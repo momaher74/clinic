@@ -5,8 +5,8 @@ class PatientHistory {
   bool alcohol;
   bool offspring; // changed to boolean
   bool smoking;
-  String maritalStatus;
-  String? allergy;
+  bool maritalStatus; // changed to boolean (married: true/false)
+  bool allergy; // boolean
   bool bilharziasis;
   bool hepatitis;
   String createdAt;
@@ -19,7 +19,7 @@ class PatientHistory {
     required this.offspring,
     required this.smoking,
     required this.maritalStatus,
-    this.allergy,
+    required this.allergy,
     required this.bilharziasis,
     required this.hepatitis,
     required this.createdAt,
@@ -32,8 +32,8 @@ class PatientHistory {
         alcohol: (m['alcohol']?.toString() ?? '0') == '1',
         offspring: (m['offspring']?.toString() ?? '0') == '1',
         smoking: (m['smoking']?.toString() ?? '0') == '1',
-        maritalStatus: m['marital_status']?.toString() ?? '',
-        allergy: m['allergy']?.toString(),
+        maritalStatus: (m['marital_status']?.toString() ?? '0') == '1',
+        allergy: (m['allergy']?.toString() ?? '0') == '1',
         bilharziasis: (m['bilharziasis']?.toString() ?? '0') == '1',
         hepatitis: (m['hepatitis']?.toString() ?? '0') == '1',
         createdAt: m['created_at']?.toString() ?? '',
@@ -46,8 +46,8 @@ class PatientHistory {
         'alcohol': alcohol ? '1' : '0',
         'offspring': offspring ? '1' : '0',
         'smoking': smoking ? '1' : '0',
-        'marital_status': maritalStatus,
-        'allergy': allergy,
+        'marital_status': maritalStatus ? '1' : '0',
+        'allergy': allergy ? '1' : '0',
         'bilharziasis': bilharziasis ? '1' : '0',
         'hepatitis': hepatitis ? '1' : '0',
         'created_at': createdAt,
