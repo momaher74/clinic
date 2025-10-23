@@ -1,5 +1,6 @@
 import 'package:clinic/features/managers/add_user/add_user/patient_cubit.dart';
 import 'package:clinic/features/screens/complaint_screen.dart';
+import 'package:clinic/features/screens/examination_screen.dart';
 import 'package:clinic/features/screens/patient_history_screen.dart';
 import 'package:clinic/features/screens/patient_screen.dart';
 import 'package:flutter/material.dart';
@@ -190,7 +191,29 @@ class _LayoutScrrenState extends State<LayoutScrren> {
           }
         return PatientHistoryScreen(patient: patient);
       default:
-        return _moreView();
+                 final cubit = context.read<PatientCubit>();
+          final state = cubit.state;
+          if (state.selectedIds.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text('No patient selected. Please select a patient from the Patients screen.'),
+              ),
+            );
+          }
+
+          final selectedId = state.selectedIds.first;
+          Patient? patient;
+          try {
+            patient = state.patients.firstWhere((p) => p.id == selectedId);
+          } catch (_) {
+            patient = null;
+          }
+
+          if (patient == null) {
+            return const Center(child: Text('Selected patient not found.'));
+          }
+        return ExaminationScreen();
     }
   }
 
