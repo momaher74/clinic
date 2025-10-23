@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:clinic/core/features/managers/add_user/add_user/add_user_state.dart';
+import 'package:clinic/features/managers/complaint/complaint/complaint_state.dart';
 
-class AddUserCubit extends Cubit<AddUserState> {
-	AddUserCubit() : super(AddUserState(isLoading: true));
+class ComplaintCubit extends Cubit<ComplaintState> {
+	ComplaintCubit() : super(ComplaintState(isLoading: true));
 	
 	Future<void> loadInitialData() async {
 		final stableState = state;

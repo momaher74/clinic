@@ -37,6 +37,8 @@ dependencies:
   sqflite_common_ffi: ^2.3.6
   path_provider: 
   flutter_bloc: 
+  sidebar_with_animation: ^0.0.3
+  toastification: ^3.0.3
 
 dev_dependencies:
   flutter_test:

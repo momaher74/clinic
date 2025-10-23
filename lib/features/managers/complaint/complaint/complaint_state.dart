@@ -1,17 +1,17 @@
-class AddUserState {
+class ComplaintState {
 	final bool isLoading;
 	final String? error;
 	  
-	const AddUserState({
+	const ComplaintState({
 		this.isLoading = false,
 		this.error,
 	});
 	  
-	AddUserState copyWith({
+	ComplaintState copyWith({
 		bool? isLoading,
 		String? error,
 	}) {
-		return AddUserState(
+		return ComplaintState(
 			isLoading: isLoading ?? this.isLoading,
 			error: error ?? this.error,
 		);
