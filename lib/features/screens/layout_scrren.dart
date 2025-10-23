@@ -1,4 +1,5 @@
 import 'package:clinic/features/managers/add_user/add_user/patient_cubit.dart';
+import 'package:clinic/features/managers/examination/examination/examination_cubit.dart';
 import 'package:clinic/features/screens/complaint_screen.dart';
 import 'package:clinic/features/screens/examination_screen.dart';
 import 'package:clinic/features/screens/patient_history_screen.dart';
@@ -213,7 +214,10 @@ class _LayoutScrrenState extends State<LayoutScrren> {
           if (patient == null) {
             return const Center(child: Text('Selected patient not found.'));
           }
-        return ExaminationScreen();
+        return BlocProvider(
+          create: (_) => ExaminationCubit(),
+          child: ExaminationScreen(),
+        );
     }
   }
 

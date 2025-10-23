@@ -1,3 +1,4 @@
+import 'package:clinic/core/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:clinic/features/managers/examination/examination/examination_cubit.dart';
@@ -43,7 +44,7 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
     context.read<ExaminationCubit>().loadForPatient(pid);
   }
 
-  void _submitExamination() {
+  Future<void> _submitExamination() async {
     if (!_formKey.currentState!.validate()) return;
     final patientState = context.read<PatientCubit>().state;
     if (patientState.selectedIds.isEmpty) {
@@ -60,17 +61,26 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
       other: otherCtrl.text.trim(),
       examination: examCtrl.text.trim(),
     );
-    context.read<ExaminationCubit>().addExamination(ex);
-    _formKey.currentState!.reset();
-    bpCtrl.clear();
-    pulseCtrl.clear();
-    tempCtrl.clear();
-    spo2Ctrl.clear();
-    otherCtrl.clear();
-    examCtrl.clear();
+
+    try {
+      FocusScope.of(context).unfocus();
+      await context.read<ExaminationCubit>().addExamination(ex);
+      // reload from DB to be safe
+      await context.read<ExaminationCubit>().loadForPatient(pid);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Examination saved')));
+      _formKey.currentState!.reset();
+      bpCtrl.clear();
+      pulseCtrl.clear();
+      tempCtrl.clear();
+      spo2Ctrl.clear();
+      otherCtrl.clear();
+      examCtrl.clear();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Save failed: $e')));
+    }
   }
 
-  void _submitReq() {
+  Future<void> _submitReq() async {
     final patientState = context.read<PatientCubit>().state;
     if (patientState.selectedIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Select a patient first')));
@@ -79,8 +89,14 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
     final pid = patientState.selectedIds.first;
     if (reqCtrl.text.trim().isEmpty) return;
     final r = Req(patientId: pid, description: reqCtrl.text.trim());
-    context.read<ExaminationCubit>().addReq(r);
-    reqCtrl.clear();
+    try {
+      await context.read<ExaminationCubit>().addReq(r);
+      await context.read<ExaminationCubit>().loadForPatient(pid);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Req added')));
+      reqCtrl.clear();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Save failed: $e')));
+    }
   }
 
   String _formatCreatedAt(String iso) {
@@ -112,18 +128,16 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ExaminationCubit(),
-      child: BlocBuilder<ExaminationCubit, ExaminationState>(
-        builder: (context, state) {
-          // try to load when patient selection changes
-          final patientState = context.watch<PatientCubit>().state;
-          if (patientState.selectedIds.isNotEmpty && (state.patientId != patientState.selectedIds.first)) {
-            // load new patient data
-            WidgetsBinding.instance.addPostFrameCallback((_) => context.read<ExaminationCubit>().loadForPatient(patientState.selectedIds.first));
-          }
+    return BlocBuilder<ExaminationCubit, ExaminationState>(
+      builder: (context, state) {
+         // try to load when patient selection changes
+         final patientState = context.watch<PatientCubit>().state;
+         if (patientState.selectedIds.isNotEmpty && (state.patientId != patientState.selectedIds.first)) {
+           // load new patient data
+           WidgetsBinding.instance.addPostFrameCallback((_) => context.read<ExaminationCubit>().loadForPatient(patientState.selectedIds.first));
+         }
 
-          return Container(
+         return Container(
             color: Colors.white,
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(18),
@@ -183,7 +197,10 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
                                   child: ElevatedButton(
                                     onPressed: _submitExamination,
                                     style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF3B82F6), padding: const EdgeInsets.symmetric(vertical: 14)),
-                                    child: const Text('Save Examination'),
+                                    child:  Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text('Save Examination' , style: TextStyle(color: Colors.white)),
+                                    ) ,
                                   ),
                                 ),
                                 const SizedBox(width: 10),
@@ -230,11 +247,14 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
                               ),
                               const SizedBox(width: 10),
                               SizedBox(
-                                height: 48,
+                                height: 60,
+                                width: 100,
                                 child: ElevatedButton(
                                   onPressed: _submitReq,
-                                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14)),
-                                  child: const Text('Add'),
+                                  style: ElevatedButton.styleFrom( 
+                                    backgroundColor: primaryColor,
+                                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14) ),
+                                  child:  Text('Add' , style: TextStyle(color: Colors.white)  ),
                                 ),
                               ),
                             ],
@@ -326,9 +346,8 @@ class _ExaminationScreenState extends State<ExaminationScreen> {
             ),
           );
         },
-      ),
-    );
-  }
+      );
+   }
 
   String _compactVitals(Examination e) {
     final parts = <String>[];
