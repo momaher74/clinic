@@ -35,6 +35,10 @@ import 'package:clinic/features/managers/labs/vitamin_level/vitamin_level_cubit.
 import 'package:clinic/features/widgets/vitamin_level_section_widgets.dart';
 import 'package:clinic/features/managers/labs/pregnancy_test/pregnancy_test_cubit.dart';
 import 'package:clinic/features/widgets/pregnancy_test_section_widgets.dart';
+import 'package:clinic/features/managers/labs/stool_tests/stool_tests_cubit.dart';
+import 'package:clinic/features/widgets/stool_tests_section_widgets.dart';
+import 'package:clinic/features/managers/labs/urine_analysis/urine_analysis_cubit.dart';
+import 'package:clinic/features/widgets/urine_analysis_section_widgets.dart';
 
 class LabsScreen extends StatelessWidget {
   final Patient patient;
@@ -103,6 +107,12 @@ class LabsScreen extends StatelessWidget {
         BlocProvider(
           create: (_) => PregnancyTestCubit()..loadForPatient(patient.id!, force: true),
         ),
+        BlocProvider(
+          create: (_) => StoolTestsCubit()..loadForPatient(patient.id!, force: true),
+        ),
+        BlocProvider(
+          create: (_) => UrineAnalysisCubit()..loadForPatient(patient.id!, force: true),
+        ),
         // Note: AutoimmuneMarkersCubit is provided by the parent (LayoutScreen) so we do not attempt to re-read it here.
       ],
       child: SingleChildScrollView(
@@ -141,6 +151,10 @@ class LabsScreen extends StatelessWidget {
             VitaminLevelSection(patient: patient),
             const SizedBox(height: 12),
             PregnancyTestSection(patient: patient),
+            const SizedBox(height: 12),
+            StoolTestsSection(patient: patient),
+            const SizedBox(height: 12),
+            UrineAnalysisSection(patient: patient),
             const SizedBox(height: 12),
             ThyroidProfileSection(patient: patient),
             const SizedBox(height: 24),
