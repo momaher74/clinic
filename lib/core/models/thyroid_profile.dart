@@ -39,17 +39,32 @@ class ThyroidProfile {
   }
 
   factory ThyroidProfile.fromMap(Map<String, dynamic> map) {
+    int? parseInt(dynamic v) {
+      if (v == null) return null;
+      if (v is int) return v;
+      return int.tryParse('$v');
+    }
+
+    double? parseDouble(dynamic v) {
+      if (v == null) return null;
+      if (v is num) return v.toDouble();
+      return double.tryParse('$v');
+    }
+
+    final id = parseInt(map['id']);
+    final patientId = parseInt(map['patient_id']) ?? 0;
+
     return ThyroidProfile(
-      id: map['id'],
-      patientId: map['patient_id'],
-      date: map['date'],
-      tsh: map['tsh'] != null ? (map['tsh'] as num).toDouble() : null,
-      ft3: map['ft3'] != null ? (map['ft3'] as num).toDouble() : null,
-      ft4: map['ft4'] != null ? (map['ft4'] as num).toDouble() : null,
-      antiTpoAb: map['anti_tpo_ab'] != null ? (map['anti_tpo_ab'] as num).toDouble() : null,
-      antiTgAb: map['anti_tg_ab'] != null ? (map['anti_tg_ab'] as num).toDouble() : null,
-      antiTshrAb: map['anti_tshr_ab'] != null ? (map['anti_tshr_ab'] as num).toDouble() : null,
-      createdAt: map['created_at'],
+      id: id,
+      patientId: patientId,
+      date: map['date'] as String? ?? '',
+      tsh: parseDouble(map['tsh']),
+      ft3: parseDouble(map['ft3']),
+      ft4: parseDouble(map['ft4']),
+      antiTpoAb: parseDouble(map['anti_tpo_ab']),
+      antiTgAb: parseDouble(map['anti_tg_ab']),
+      antiTshrAb: parseDouble(map['anti_tshr_ab']),
+      createdAt: map['created_at'] as String? ?? DateTime.now().toIso8601String(),
     );
   }
 }

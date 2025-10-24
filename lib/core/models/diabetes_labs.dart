@@ -42,18 +42,33 @@ class DiabetesLabs {
   }
 
   factory DiabetesLabs.fromMap(Map<String, dynamic> map) {
+    int? parseInt(dynamic v) {
+      if (v == null) return null;
+      if (v is int) return v;
+      return int.tryParse('$v');
+    }
+
+    double? parseDouble(dynamic v) {
+      if (v == null) return null;
+      if (v is num) return v.toDouble();
+      return double.tryParse('$v');
+    }
+
+    final id = parseInt(map['id']);
+    final patientId = parseInt(map['patient_id']) ?? 0;
+
     return DiabetesLabs(
-      id: map['id'],
-      patientId: map['patient_id'],
-      date: map['date'],
-      fbiGlu: map['fbi_glu'] != null ? (map['fbi_glu'] as num).toDouble() : null,
-      hrsPpBiGlu: map['hrs_pp_bi_glu'] != null ? (map['hrs_pp_bi_glu'] as num).toDouble() : null,
-      hba1c: map['hba1c'] != null ? (map['hba1c'] as num).toDouble() : null,
-      cPeptide: map['c_peptide'] != null ? (map['c_peptide'] as num).toDouble() : null,
-      insulinLevel: map['insulin_level'] != null ? (map['insulin_level'] as num).toDouble() : null,
-      rbs: map['rbs'] != null ? (map['rbs'] as num).toDouble() : null,
-      homaIr: map['homa_ir'] != null ? (map['homa_ir'] as num).toDouble() : null,
-      createdAt: map['created_at'],
+      id: id,
+      patientId: patientId,
+      date: map['date'] as String? ?? '',
+      fbiGlu: parseDouble(map['fbi_glu']),
+      hrsPpBiGlu: parseDouble(map['hrs_pp_bi_glu']),
+      hba1c: parseDouble(map['hba1c']),
+      cPeptide: parseDouble(map['c_peptide']),
+      insulinLevel: parseDouble(map['insulin_level']),
+      rbs: parseDouble(map['rbs']),
+      homaIr: parseDouble(map['homa_ir']),
+      createdAt: map['created_at'] as String? ?? DateTime.now().toIso8601String(),
     );
   }
 }
