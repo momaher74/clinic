@@ -30,14 +30,24 @@ class InflammatoryMarkers {
   }
 
   factory InflammatoryMarkers.fromMap(Map<String, dynamic> map) {
+    double? parseNullableDouble(dynamic v) {
+      if (v == null) return null;
+      if (v is num) return v.toDouble();
+      final s = v.toString().trim();
+      if (s.isEmpty) return null;
+      return double.tryParse(s.replaceAll(',', '.'));
+    }
+
+    String parseString(dynamic v) => v == null ? '' : v.toString();
+
     return InflammatoryMarkers(
-      id: map['id'],
-      patientId: map['patient_id'],
-      date: map['date'],
-      esr: map['esr'] != null ? (map['esr'] as num).toDouble() : null,
-      crp: map['crp'] != null ? (map['crp'] as num).toDouble() : null,
-      asot: map['asot'] != null ? (map['asot'] as num).toDouble() : null,
-      createdAt: map['created_at'],
+      id: (map['id'] is int) ? map['id'] as int : (map['id'] is String ? int.tryParse(map['id']) : null),
+      patientId: (map['patient_id'] is int) ? map['patient_id'] as int : int.tryParse(map['patient_id']?.toString() ?? '') ?? 0,
+      date: parseString(map['date']),
+      esr: parseNullableDouble(map['esr']),
+      crp: parseNullableDouble(map['crp']),
+      asot: parseNullableDouble(map['asot']),
+      createdAt: map['created_at']?.toString() ?? DateTime.now().toIso8601String(),
     );
   }
 }

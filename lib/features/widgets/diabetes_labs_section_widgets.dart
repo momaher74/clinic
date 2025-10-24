@@ -49,16 +49,16 @@ class DiabetesLabsSection extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: state.list.length,
-                  itemBuilder: (context, index) {
-                    final item = state.list[index];
-                    return _buildCard(context, item);
-                  },
-                ),
+              // Render list items with a shrink-wrapped ListView (no Flexible) so it works inside
+              // the parent's SingleChildScrollView. Flexible can cause zero-height issues here.
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: state.list.length,
+                itemBuilder: (context, index) {
+                  final item = state.list[index];
+                  return _buildCard(context, item);
+                },
               ),
             ],
           ),

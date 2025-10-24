@@ -15,6 +15,10 @@ import 'package:clinic/features/managers/labs/lipid_profile/lipid_profile_cubit.
 import 'package:clinic/features/widgets/lipid_profile_section_widgets.dart';
 import 'package:clinic/features/managers/labs/virology/virology_cubit.dart';
 import 'package:clinic/features/widgets/virology_section_widgets.dart';
+import 'package:clinic/features/managers/labs/inflammatory_markers/inflammatory_markers_cubit.dart';
+import 'package:clinic/features/widgets/inflammatory_markers_section_widgets.dart';
+import 'package:clinic/features/managers/labs/pancreatic_enzymes/pancreatic_enzymes_cubit.dart';
+import 'package:clinic/features/widgets/pancreatic_enzymes_section_widgets.dart';
 
 class LabsScreen extends StatelessWidget {
   final Patient patient;
@@ -47,6 +51,14 @@ class LabsScreen extends StatelessWidget {
         BlocProvider.value(
           value: context.read<VirologyCubit>(),
         ),
+        // Re-provide the InflammatoryMarkersCubit from parent
+        BlocProvider.value(
+          value: context.read<InflammatoryMarkersCubit>(),
+        ),
+        // Re-provide the PancreaticEnzymesCubit from parent
+        BlocProvider.value(
+          value: context.read<PancreaticEnzymesCubit>(),
+        ),
       ],
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -63,7 +75,11 @@ class LabsScreen extends StatelessWidget {
             const SizedBox(height: 12),
             LipidProfileSection(patient: patient),
             const SizedBox(height: 12),
+            PancreaticEnzymesSection(patient: patient),
+            const SizedBox(height: 12),
             VirologySection(patient: patient),
+            const SizedBox(height: 12),
+            InflammatoryMarkersSection(patient: patient),
             const SizedBox(height: 12),
             ThyroidProfileSection(patient: patient),
             const SizedBox(height: 24),

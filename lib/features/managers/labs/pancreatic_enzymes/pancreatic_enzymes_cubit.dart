@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:clinic/core/models/pancreatic_enzymes.dart';
 import 'package:clinic/core/services/sql_service.dart';
@@ -25,6 +27,7 @@ class PancreaticEnzymesCubit extends Cubit<PancreaticEnzymesState> {
   bool _tableCreated = false;
 
   Future<void> loadForPatient(int patientId, {bool force = false}) async {
+    log('PancreaticEnzymesCubit: loadForPatient($patientId) force=$force');
     if (_currentPatientId == patientId && _loaded && !force) return;
     _currentPatientId = patientId;
     _loaded = true;
@@ -42,15 +45,23 @@ class PancreaticEnzymesCubit extends Cubit<PancreaticEnzymesState> {
         whereArgs: [patientId],
         orderBy: 'created_at DESC',
       );
+
+      log('Raw pancreatic rows: ${maps.length}');
+      try { log(maps.toString()); } catch (_) {}
       final items = maps.map((m) => PancreaticEnzymes.fromMap(m)).toList();
+      log('Parsed pancreatic items: ${items.length}');
+      try { log(items.map((i) => i.toMap()).toString()); } catch (_) {}
       emit(state.copyWith(list: items, isLoading: false));
-    } catch (e) {
+    } catch (e, st) {
+      log('Error loading pancreatic enzymes for patient $patientId: $e');
+      log(st.toString());
       emit(state.copyWith(isLoading: false));
     }
   }
 
   Future<void> add(PancreaticEnzymes item) async {
     try {
+      log('PancreaticEnzymesCubit: add called with ${item.toMap()}');
       final db = await _db.database;
       final id = await db.insert('pancreatic_enzymes', item.toMap());
       final updated = PancreaticEnzymes(
@@ -62,7 +73,10 @@ class PancreaticEnzymesCubit extends Cubit<PancreaticEnzymesState> {
         createdAt: item.createdAt,
       );
       emit(state.copyWith(list: [updated, ...state.list]));
-    } catch (e) {
+      log('PancreaticEnzymesCubit: after add emit listLen=${state.list.length + 1}');
+    } catch (e, st) {
+      log('PancreaticEnzymesCubit: add error: $e');
+      log(st.toString());
       // handle error
     }
   }
