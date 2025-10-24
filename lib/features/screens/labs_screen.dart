@@ -23,6 +23,8 @@ import 'package:clinic/features/managers/labs/autoimmune_markers/autoimmune_mark
 import 'package:clinic/features/widgets/autoimmune_markers_section_widgets.dart';
 import 'package:clinic/features/managers/labs/coagulation_profile/coagulation_profile_cubit.dart';
 import 'package:clinic/features/widgets/coagulation_profile_section_widgets.dart';
+import 'package:clinic/features/managers/labs/iron_profile/iron_profile_cubit.dart';
+import 'package:clinic/features/widgets/iron_profile_section_widgets.dart';
 import 'package:clinic/features/managers/labs/celiac_disease_labs/celiac_disease_labs_cubit.dart';
 import 'package:clinic/features/widgets/celiac_disease_labs_section_widgets.dart';
 import 'package:clinic/features/managers/labs/tumor_markers/tumor_markers_cubit.dart';
@@ -51,6 +53,9 @@ class LabsScreen extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => LipidProfileCubit()..loadForPatient(patient.id!, force: true),
+        ),
+        BlocProvider(
+          create: (_) => IronProfileCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
           create: (_) => ThyroidProfileCubit()..loadForPatient(patient.id!, force: true),
@@ -99,6 +104,8 @@ class LabsScreen extends StatelessWidget {
             DiabetesLabsSection(patient: patient),
             const SizedBox(height: 12),
             LipidProfileSection(patient: patient),
+            const SizedBox(height: 12),
+            IronProfileSection(patient: patient),
             const SizedBox(height: 12),
             PancreaticEnzymesSection(patient: patient),
             const SizedBox(height: 12),
