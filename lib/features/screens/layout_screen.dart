@@ -11,6 +11,7 @@ import 'package:clinic/features/screens/examination_screen.dart';
 import 'package:clinic/features/screens/labs_screen.dart';
 import 'package:clinic/features/screens/patient_history_screen.dart';
 import 'package:clinic/features/screens/patient_screen.dart';
+import 'package:clinic/features/screens/imaging_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:clinic/core/models/patient.dart';
@@ -315,6 +316,8 @@ class _LayoutScrrenState extends State<LayoutScrren> {
         } catch (e) {
           return Center(child: Text('Error accessing patient selection: $e'));
         }
+      case 5:
+        return ImagingScreen();
       default:
         return Center(
           child: Text(
