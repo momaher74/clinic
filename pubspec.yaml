@@ -42,7 +42,6 @@ dependencies:
   sidebar_with_animation: ^0.0.3
   toastification: ^3.0.3
   shared_preferences: ^2.2.3
-  image_picker: ^0.8.7+5
   uuid: 
   file_picker: 
 

@@ -12,6 +12,7 @@ import 'package:clinic/features/screens/labs_screen.dart';
 import 'package:clinic/features/screens/patient_history_screen.dart';
 import 'package:clinic/features/screens/patient_screen.dart';
 import 'package:clinic/features/screens/imaging_screen.dart';
+import 'package:clinic/features/screens/endoscopy_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:clinic/core/models/patient.dart';
@@ -318,6 +319,38 @@ class _LayoutScrrenState extends State<LayoutScrren> {
         }
       case 5:
         return ImagingScreen();
+      case 6:
+        // Safely read selected patient from PatientCubit and show EndoscopyScreen
+        try {
+          final cubit = context.read<PatientCubit>();
+          final state = cubit.state;
+          if (state.selectedIds.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'No patient selected. Please select a patient from the Patients screen.',
+                ),
+              ),
+            );
+          }
+
+          final selectedId = state.selectedIds.first;
+          Patient? patient;
+          try {
+            patient = state.patients.firstWhere((p) => p.id == selectedId);
+          } catch (_) {
+            patient = null;
+          }
+
+          if (patient == null) {
+            return const Center(child: Text('Selected patient not found.'));
+          }
+
+          return EndoscopyScreen(patient: patient);
+        } catch (e) {
+          return Center(child: Text('Error accessing patient selection: $e'));
+        }
       default:
         return Center(
           child: Text(

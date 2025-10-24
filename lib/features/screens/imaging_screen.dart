@@ -49,48 +49,87 @@ class _ImagingScreenState extends State<ImagingScreen> {
     return BlocProvider.value(
       value: cubit!,
       child: Scaffold(
-        appBar: AppBar(title: const Text('Imaging')),
+        appBar: AppBar(
+          title: const Text('Imaging'),
+          centerTitle: true,
+          elevation: 1,
+        ),
         body: BlocBuilder<ImagingCubit, ImagingState>(builder: (context, state) {
           return Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(20.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header / instruction area. Use Add button (FAB) to open dialog for input.
-                Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16),
-                    child: Row(
-                      children: const [
-                        Icon(Icons.photo_camera, color: Colors.blue),
-                        SizedBox(width: 12),
-                        Expanded(child: Text('Tap "Add" to attach an image and enter type/doctor/where/report')),
-                      ],
+                // Modern header
+                Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.all(12),
+                      child: Icon(Icons.photo_library_rounded, color: Theme.of(context).colorScheme.primary, size: 28),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text('Imaging', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                          SizedBox(height: 4),
+                          Text('Save images and reports — files are copied into the app storage', style: TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: _openAddDialog,
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add'),
+                      style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 18),
+
+                // Contents
                 Expanded(
                   child: state.items.isEmpty
-                      ? const Center(child: Text('No imaging items yet'))
-                      : ListView.separated(
-                          itemCount: state.items.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final item = state.items[index];
-                            return _ImagingCard(item: item, onDelete: () => cubit!.removeItem(item.id));
-                          },
-                        ),
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.photo_album_outlined, size: 72, color: Colors.grey.shade300),
+                              const SizedBox(height: 12),
+                              const Text('No imaging items yet', style: TextStyle(color: Colors.grey)),
+                            ],
+                          ),
+                        )
+                      : LayoutBuilder(builder: (context, constraints) {
+                          final crossAxis = (constraints.maxWidth ~/ 260).clamp(1, 4);
+                          return GridView.builder(
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: crossAxis,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 3.2,
+                            ),
+                            itemCount: state.items.length,
+                            itemBuilder: (context, index) {
+                              final item = state.items[index];
+                              return _ImagingCard(item: item, onDelete: () => cubit!.removeItem(item.id));
+                            },
+                          );
+                        }),
                 ),
               ],
             ),
           );
         }),
-        floatingActionButton: FloatingActionButton.extended(
+        floatingActionButton: FloatingActionButton(
           onPressed: _openAddDialog,
-          icon: const Icon(Icons.add),
-          label: const Text('Add'),
+          child: const Icon(Icons.add),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
     );
@@ -182,6 +221,24 @@ class _ImagingScreenState extends State<ImagingScreen> {
           );
         });
       },
+    );
+  }
+
+  // Fullscreen image preview dialog
+  Future<void> _showImagePreview(String imagePath, String title) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (title.isNotEmpty) Padding(padding: const EdgeInsets.all(12), child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold))),
+            Flexible(child: Image.file(File(imagePath), fit: BoxFit.contain)),
+            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Close')),
+          ],
+        ),
+      ),
     );
   }
 }
