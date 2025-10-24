@@ -7,6 +7,8 @@ import 'package:clinic/features/managers/labs/liver_function_test/liver_function
 import 'package:clinic/features/widgets/liver_function_section_widgets.dart';
 import 'package:clinic/features/managers/labs/kidney_function_test/kidney_function_test_cubit.dart';
 import 'package:clinic/features/widgets/kidney_function_section_widgets.dart';
+import 'package:clinic/features/managers/labs/thyroid_profile/thyroid_profile_cubit.dart';
+import 'package:clinic/features/widgets/thyroid_profile_section_widgets.dart';
 
 class LabsScreen extends StatelessWidget {
   final Patient patient;
@@ -26,6 +28,9 @@ class LabsScreen extends StatelessWidget {
         BlocProvider(
           create: (_) => KidneyFunctionTestCubit()..loadForPatient(patient.id!),
         ),
+        BlocProvider(
+          create: (_) => ThyroidProfileCubit()..loadForPatient(patient.id!),
+        ),
       ],
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -37,6 +42,8 @@ class LabsScreen extends StatelessWidget {
             LiverFunctionSection(patient: patient),
             const SizedBox(height: 12),
             KidneyFunctionSection(patient: patient),
+            const SizedBox(height: 12),
+            ThyroidProfileSection(patient: patient),
             const SizedBox(height: 24),
           ],
         ),
