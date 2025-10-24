@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:clinic/core/models/autoimmune_markers.dart';
 import 'package:clinic/core/services/sql_service.dart';
@@ -25,6 +27,7 @@ class AutoimmuneMarkersCubit extends Cubit<AutoimmuneMarkersState> {
   bool _tableCreated = false;
 
   Future<void> loadForPatient(int patientId, {bool force = false}) async {
+    log('AutoimmuneMarkersCubit: loadForPatient($patientId) force=$force');
     if (_currentPatientId == patientId && _loaded && !force) return;
     _currentPatientId = patientId;
     _loaded = true;
@@ -32,8 +35,10 @@ class AutoimmuneMarkersCubit extends Cubit<AutoimmuneMarkersState> {
     emit(state.copyWith(isLoading: true));
     try {
       if (!_tableCreated) {
+        log('AutoimmuneMarkersCubit: ensuring table exists');
         await _db.createTableWithAttributes('autoimmune_markers', ['patient_id', 'date', 'ana', 'ama', 'asma', 'lkm', 'sla', 'total_igg', 'total_igm', 'anca', 'asca', 'anti_ds_dna', 'c3', 'c4', 'rf', 'anti_ccp', 'created_at']);
         _tableCreated = true;
+        log('AutoimmuneMarkersCubit: table created flag set');
       }
       final db = await _db.database;
       final maps = await db.query(
@@ -42,15 +47,23 @@ class AutoimmuneMarkersCubit extends Cubit<AutoimmuneMarkersState> {
         whereArgs: [patientId],
         orderBy: 'created_at DESC',
       );
+
+      log('Raw autoimmune rows: ${maps.length}');
+      try { log(maps.toString()); } catch (_) {}
       final items = maps.map((m) => AutoimmuneMarkers.fromMap(m)).toList();
+      log('Parsed autoimmune items: ${items.length}');
+      try { log(items.map((i) => i.toMap()).toString()); } catch (_) {}
       emit(state.copyWith(list: items, isLoading: false));
-    } catch (e) {
+    } catch (e, st) {
+      log('Error loading autoimmune markers for patient $patientId: $e');
+      log(st.toString());
       emit(state.copyWith(isLoading: false));
     }
   }
 
   Future<void> add(AutoimmuneMarkers item) async {
     try {
+      log('AutoimmuneMarkersCubit: add called with ${item.toMap()}');
       final db = await _db.database;
       final id = await db.insert('autoimmune_markers', item.toMap());
       final updated = AutoimmuneMarkers(
@@ -74,7 +87,10 @@ class AutoimmuneMarkersCubit extends Cubit<AutoimmuneMarkersState> {
         createdAt: item.createdAt,
       );
       emit(state.copyWith(list: [updated, ...state.list]));
-    } catch (e) {
+      log('AutoimmuneMarkersCubit: after add emit listLen=${state.list.length + 1}');
+    } catch (e, st) {
+      log('AutoimmuneMarkersCubit: add error: $e');
+      log(st.toString());
       // handle error
     }
   }

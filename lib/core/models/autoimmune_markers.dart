@@ -11,11 +11,11 @@ class AutoimmuneMarkers {
   final double? totalIgM;
   final String? anca;
   final String? asca;
-  final String? antiDsDna;
+  final double? antiDsDna;
   final double? c3;
   final double? c4;
-  final String? rf;
-  final String? antiCcp;
+  final double? rf;
+  final double? antiCcp;
   final String createdAt;
 
   AutoimmuneMarkers({
@@ -63,25 +63,39 @@ class AutoimmuneMarkers {
   }
 
   factory AutoimmuneMarkers.fromMap(Map<String, dynamic> map) {
+    double? parseNullableDouble(dynamic v) {
+      if (v == null) return null;
+      if (v is num) return v.toDouble();
+      final s = v.toString().trim();
+      if (s.isEmpty) return null;
+      return double.tryParse(s.replaceAll(',', '.'));
+    }
+
+    String? parseNullableString(dynamic v) {
+      if (v == null) return null;
+      final s = v.toString().trim();
+      return s.isEmpty ? null : s;
+    }
+
     return AutoimmuneMarkers(
-      id: map['id'],
-      patientId: map['patient_id'],
-      date: map['date'],
-      ana: map['ana'],
-      ama: map['ama'],
-      asma: map['asma'],
-      lkm: map['lkm'],
-      sla: map['sla'],
-      totalIgG: map['total_igg'] != null ? (map['total_igg'] as num).toDouble() : null,
-      totalIgM: map['total_igm'] != null ? (map['total_igm'] as num).toDouble() : null,
-      anca: map['anca'],
-      asca: map['asca'],
-      antiDsDna: map['anti_ds_dna'],
-      c3: map['c3'] != null ? (map['c3'] as num).toDouble() : null,
-      c4: map['c4'] != null ? (map['c4'] as num).toDouble() : null,
-      rf: map['rf'],
-      antiCcp: map['anti_ccp'],
-      createdAt: map['created_at'],
+      id: (map['id'] is int) ? map['id'] as int : (map['id'] is String ? int.tryParse(map['id']) : null),
+      patientId: (map['patient_id'] is int) ? map['patient_id'] as int : int.tryParse(map['patient_id']?.toString() ?? '') ?? 0,
+      date: map['date']?.toString() ?? '',
+      ana: parseNullableString(map['ana']),
+      ama: parseNullableString(map['ama']),
+      asma: parseNullableString(map['asma']),
+      lkm: parseNullableString(map['lkm']),
+      sla: parseNullableString(map['sla']),
+      totalIgG: parseNullableDouble(map['total_igg']),
+      totalIgM: parseNullableDouble(map['total_igm']),
+      anca: parseNullableString(map['anca']),
+      asca: parseNullableString(map['asca']),
+      antiDsDna: parseNullableDouble(map['anti_ds_dna']),
+      c3: parseNullableDouble(map['c3']),
+      c4: parseNullableDouble(map['c4']),
+      rf: parseNullableDouble(map['rf']),
+      antiCcp: parseNullableDouble(map['anti_ccp']),
+      createdAt: map['created_at']?.toString() ?? DateTime.now().toIso8601String(),
     );
   }
 }
