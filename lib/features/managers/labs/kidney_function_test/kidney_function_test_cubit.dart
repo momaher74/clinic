@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:clinic/core/models/kidney_function_test.dart';
 import 'package:clinic/core/services/sql_service.dart';
@@ -25,6 +27,7 @@ class KidneyFunctionTestCubit extends Cubit<KidneyFunctionTestState> {
   bool _tableCreated = false;
 
   Future<void> loadForPatient(int patientId, {bool force = false}) async {
+    log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     if (_currentPatientId == patientId && _loaded && !force) return;
     _currentPatientId = patientId;
     _loaded = true;
@@ -43,8 +46,12 @@ class KidneyFunctionTestCubit extends Cubit<KidneyFunctionTestState> {
         orderBy: 'created_at DESC',
       );
       final items = maps.map((m) => KidneyFunctionTest.fromMap(m)).toList();
+      log('Loaded ${items.length} kidney function tests for patient $patientId');
+      log(items.toString());
       emit(state.copyWith(list: items, isLoading: false));
-    } catch (e) {
+    } catch (e, st) {
+      log('Error loading kidney function tests for patient $patientId: $e');
+      log(st.toString());
       emit(state.copyWith(isLoading: false));
     }
   }
@@ -69,8 +76,9 @@ class KidneyFunctionTestCubit extends Cubit<KidneyFunctionTestState> {
         createdAt: item.createdAt,
       );
       emit(state.copyWith(list: [updated, ...state.list]));
-    } catch (e) {
-      // handle error
+    } catch (e, st) {
+      log('Error adding kidney function test: $e');
+      log(st.toString());
     }
   }
 
@@ -79,8 +87,9 @@ class KidneyFunctionTestCubit extends Cubit<KidneyFunctionTestState> {
       final db = await _db.database;
       await db.delete('kidney_function_test', where: 'id = ?', whereArgs: [id]);
       emit(state.copyWith(list: state.list.where((c) => c.id != id).toList()));
-    } catch (e) {
-      // handle error
+    } catch (e, st) {
+      log('Error deleting kidney function test id $id: $e');
+      log(st.toString());
     }
   }
 

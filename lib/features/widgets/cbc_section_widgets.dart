@@ -11,6 +11,13 @@ class CbcSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Defensive reload: ensure CbcCubit loads patient data after first build (helps after restart)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        context.read<CbcCubit>().loadForPatient(patient.id!, force: true);
+      } catch (_) {}
+    });
+
     return BlocBuilder<CbcCubit, CbcState>(
       builder: (context, state) {
         if (state.isLoading) {

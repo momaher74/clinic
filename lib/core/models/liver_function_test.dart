@@ -45,9 +45,14 @@ class LiverFunctionTest {
   }
 
   factory LiverFunctionTest.fromMap(Map<String, dynamic> map) {
+    final id = map['id'] is int ? map['id'] as int : int.tryParse('${map['id']}');
+    final patientId = map['patient_id'] is int
+        ? map['patient_id'] as int
+        : int.tryParse('${map['patient_id']}') ?? 0;
+
     return LiverFunctionTest(
-      id: map['id'] as int?,
-      patientId: map['patient_id'] as int,
+      id: id,
+      patientId: patientId,
       date: map['date'] as String? ?? '',
       tbill: map['tbill'] as String? ?? '',
       dbill: map['dbill'] as String? ?? '',
@@ -57,7 +62,7 @@ class LiverFunctionTest {
       ast: map['ast'] as String? ?? '',
       alp: map['alp'] as String? ?? '',
       ggt: map['ggt'] as String? ?? '',
-      createdAt: map['created_at'] as String?,
+      createdAt: map['created_at'] as String? ?? DateTime.now().toIso8601String(),
     );
   }
 }

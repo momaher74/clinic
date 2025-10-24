@@ -48,9 +48,15 @@ class KidneyFunctionTest {
   }
 
   factory KidneyFunctionTest.fromMap(Map<String, dynamic> map) {
+    // Accept both int and string representations (defensive parsing)
+    final id = map['id'] is int ? map['id'] as int : int.tryParse('${map['id']}');
+    final patientId = map['patient_id'] is int
+        ? map['patient_id'] as int
+        : int.tryParse('${map['patient_id']}') ?? 0;
+
     return KidneyFunctionTest(
-      id: map['id'] as int?,
-      patientId: map['patient_id'] as int,
+      id: id,
+      patientId: patientId,
       date: map['date'] as String? ?? '',
       sCreatinine: map['s_creatinine'] as String? ?? '',
       urea: map['urea'] as String? ?? '',
@@ -61,7 +67,7 @@ class KidneyFunctionTest {
       mg: map['mg'] as String? ?? '',
       po4: map['po4'] as String? ?? '',
       pth: map['pth'] as String? ?? '',
-      createdAt: map['created_at'] as String?,
+      createdAt: map['created_at'] as String? ?? DateTime.now().toIso8601String(),
     );
   }
 }
