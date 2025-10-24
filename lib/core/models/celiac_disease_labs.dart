@@ -45,19 +45,37 @@ class CeliacDiseaseLabs {
   }
 
   factory CeliacDiseaseLabs.fromMap(Map<String, dynamic> map) {
+    int? parseInt(dynamic v) {
+      if (v == null) return null;
+      if (v is int) return v;
+      return int.tryParse(v.toString());
+    }
+
+    double? parseDouble(dynamic v) {
+      if (v == null) return null;
+      if (v is double) return v;
+      if (v is num) return v.toDouble();
+      return double.tryParse(v.toString().replaceAll(',', '.'));
+    }
+
+    String? parseString(dynamic v) {
+      if (v == null) return null;
+      return v.toString();
+    }
+
     return CeliacDiseaseLabs(
-      id: map['id'],
-      patientId: map['patient_id'],
-      date: map['date'],
-      agaIgA: map['aga_iga'],
-      agaIgG: map['aga_igg'],
-      emaIgA: map['ema_iga'],
-      ttgIgA: map['ttg_iga'],
-      ttgIgG: map['ttg_igg'],
-      dgpIgA: map['dgp_iga'],
-      dgpIgG: map['dgp_igg'],
-      totalIgA: map['total_iga'] != null ? (map['total_iga'] as num).toDouble() : null,
-      createdAt: map['created_at'],
+      id: parseInt(map['id']),
+      patientId: parseInt(map['patient_id']) ?? 0,
+      date: parseString(map['date']) ?? '',
+      agaIgA: parseString(map['aga_iga']),
+      agaIgG: parseString(map['aga_igg']),
+      emaIgA: parseString(map['ema_iga']),
+      ttgIgA: parseString(map['ttg_iga']),
+      ttgIgG: parseString(map['ttg_igg']),
+      dgpIgA: parseString(map['dgp_iga']),
+      dgpIgG: parseString(map['dgp_igg']),
+      totalIgA: parseDouble(map['total_iga']),
+      createdAt: parseString(map['created_at']) ?? DateTime.now().toIso8601String(),
     );
   }
 }

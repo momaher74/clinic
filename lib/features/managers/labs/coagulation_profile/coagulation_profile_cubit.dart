@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:clinic/core/models/coagulation_profile.dart';
 import 'package:clinic/core/services/sql_service.dart';
@@ -51,8 +53,10 @@ class CoagulationProfileCubit extends Cubit<CoagulationProfileState> {
 
   Future<void> add(CoagulationProfile item) async {
     try {
+      log('CoagulationProfileCubit: add called with ${item.toMap()}');
       final db = await _db.database;
       final id = await db.insert('coagulation_profile', item.toMap());
+      log('CoagulationProfileCubit: inserted id=$id');
       final updated = CoagulationProfile(
         id: id,
         patientId: item.patientId,
@@ -64,18 +68,22 @@ class CoagulationProfileCubit extends Cubit<CoagulationProfileState> {
         createdAt: item.createdAt,
       );
       emit(state.copyWith(list: [updated, ...state.list]));
-    } catch (e) {
-      // handle error
+    } catch (e, st) {
+      log('CoagulationProfileCubit: add error $e');
+      log(st.toString());
     }
   }
 
   Future<void> delete(int id) async {
     try {
+      log('CoagulationProfileCubit: delete called for id=$id');
       final db = await _db.database;
-      await db.delete('coagulation_profile', where: 'id = ?', whereArgs: [id]);
+      final rows = await db.delete('coagulation_profile', where: 'id = ?', whereArgs: [id]);
+      log('CoagulationProfileCubit: rows deleted=$rows');
       emit(state.copyWith(list: state.list.where((c) => c.id != id).toList()));
-    } catch (e) {
-      // handle error
+    } catch (e, st) {
+      log('CoagulationProfileCubit: delete error $e');
+      log(st.toString());
     }
   }
 

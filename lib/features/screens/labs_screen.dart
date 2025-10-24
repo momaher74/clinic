@@ -21,6 +21,10 @@ import 'package:clinic/features/managers/labs/pancreatic_enzymes/pancreatic_enzy
 import 'package:clinic/features/widgets/pancreatic_enzymes_section_widgets.dart';
 import 'package:clinic/features/managers/labs/autoimmune_markers/autoimmune_markers_cubit.dart';
 import 'package:clinic/features/widgets/autoimmune_markers_section_widgets.dart';
+import 'package:clinic/features/managers/labs/coagulation_profile/coagulation_profile_cubit.dart';
+import 'package:clinic/features/widgets/coagulation_profile_section_widgets.dart';
+import 'package:clinic/features/managers/labs/celiac_disease_labs/celiac_disease_labs_cubit.dart';
+import 'package:clinic/features/widgets/celiac_disease_labs_section_widgets.dart';
 
 class LabsScreen extends StatelessWidget {
   final Patient patient;
@@ -65,6 +69,14 @@ class LabsScreen extends StatelessWidget {
         BlocProvider.value(
           value: context.read<AutoimmuneMarkersCubit>(),
         ),
+        // Re-provide the CoagulationProfileCubit from parent
+        BlocProvider.value(
+          value: context.read<CoagulationProfileCubit>(),
+        ),
+        // Provide CeliacDiseaseLabsCubit for this screen
+        BlocProvider(
+          create: (_) => CeliacDiseaseLabsCubit()..loadForPatient(patient.id!, force: true),
+        ),
         // Note: AutoimmuneMarkersCubit is provided by the parent (LayoutScreen) so we do not attempt to re-read it here.
       ],
       child: SingleChildScrollView(
@@ -89,6 +101,10 @@ class LabsScreen extends StatelessWidget {
             InflammatoryMarkersSection(patient: patient),
             const SizedBox(height: 12),
             AutoimmuneMarkersSection(patient: patient),
+            const SizedBox(height: 12),
+            CoagulationProfileSection(patient: patient),
+            const SizedBox(height: 12),
+            CeliacDiseaseLabsSection(patient: patient),
             const SizedBox(height: 12),
             ThyroidProfileSection(patient: patient),
             const SizedBox(height: 24),

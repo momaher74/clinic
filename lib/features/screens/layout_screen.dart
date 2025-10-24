@@ -5,6 +5,7 @@ import 'package:clinic/features/managers/labs/virology/virology_cubit.dart';
 import 'package:clinic/features/managers/labs/inflammatory_markers/inflammatory_markers_cubit.dart';
 import 'package:clinic/features/managers/labs/pancreatic_enzymes/pancreatic_enzymes_cubit.dart';
 import 'package:clinic/features/managers/labs/autoimmune_markers/autoimmune_markers_cubit.dart';
+import 'package:clinic/features/managers/labs/coagulation_profile/coagulation_profile_cubit.dart';
 import 'package:clinic/features/screens/complaint_screen.dart';
 import 'package:clinic/features/screens/examination_screen.dart';
 import 'package:clinic/features/screens/labs_screen.dart';
@@ -301,7 +302,10 @@ class _LayoutScrrenState extends State<LayoutScrren> {
                     create: (_) => PancreaticEnzymesCubit()..loadForPatient(sel.id!, force: true),
                     child: BlocProvider<AutoimmuneMarkersCubit>(
                       create: (_) => AutoimmuneMarkersCubit()..loadForPatient(sel.id!, force: true),
-                      child: LabsScreen(patient: sel),
+                      child: BlocProvider<CoagulationProfileCubit>(
+                        create: (_) => CoagulationProfileCubit()..loadForPatient(sel.id!, force: true),
+                        child: LabsScreen(patient: sel),
+                      ),
                     ),
                   ),
                 ),
