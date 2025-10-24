@@ -1,7 +1,9 @@
 import 'package:clinic/features/managers/add_user/add_user/patient_cubit.dart';
 import 'package:clinic/features/managers/examination/examination/examination_cubit.dart';
+import 'package:clinic/features/managers/labs/labs_cubit.dart';
 import 'package:clinic/features/screens/complaint_screen.dart';
 import 'package:clinic/features/screens/examination_screen.dart';
+import 'package:clinic/features/screens/labs_screen.dart';
 import 'package:clinic/features/screens/patient_history_screen.dart';
 import 'package:clinic/features/screens/patient_screen.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +19,17 @@ class LayoutScrren extends StatefulWidget {
 
 class _LayoutScrrenState extends State<LayoutScrren> {
   int _selectedIndex = 0;
-  final _titles = ['Patients', 'Complaint', 'Patient History', 'Examination' , "Labs" , "Imaging" , "Endoscopy" , "Pathology" , "Precription"];
+  final _titles = [
+    'Patients',
+    'Complaint',
+    'Patient History',
+    'Examination',
+    "Labs",
+    "Imaging",
+    "Endoscopy",
+    "Pathology",
+    "Precription",
+  ];
 
   void _onSelect(int idx) {
     setState(() => _selectedIndex = idx);
@@ -26,7 +38,6 @@ class _LayoutScrrenState extends State<LayoutScrren> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       // Responsive body: persistent sidebar on wide screens, Drawer on small
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -45,13 +56,7 @@ class _LayoutScrrenState extends State<LayoutScrren> {
       ),
 
       // Drawer for small screens
-      drawer: Drawer(
-        child: SafeArea(
-          child: _buildSidebar(isWide: false),
-        ),
-      ),
-
-    
+      drawer: Drawer(child: SafeArea(child: _buildSidebar(isWide: false))),
     );
   }
 
@@ -63,7 +68,11 @@ class _LayoutScrrenState extends State<LayoutScrren> {
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 4)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -72,7 +81,14 @@ class _LayoutScrrenState extends State<LayoutScrren> {
           // optional header in sidebar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
-            child: Text('Menu', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey.shade800)),
+            child: Text(
+              'Menu',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
           ),
           const SizedBox(height: 8),
           // menu items (text-only as requested)
@@ -85,9 +101,14 @@ class _LayoutScrrenState extends State<LayoutScrren> {
               },
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 12,
+                ),
                 decoration: BoxDecoration(
-                  color: selected ? const Color(0xFFEEF2FF) : Colors.transparent,
+                  color: selected
+                      ? const Color(0xFFEEF2FF)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -98,7 +119,9 @@ class _LayoutScrrenState extends State<LayoutScrren> {
                       width: 6,
                       height: 6,
                       decoration: BoxDecoration(
-                        color: selected ? const Color(0xFF3B82F6) : Colors.transparent,
+                        color: selected
+                            ? const Color(0xFF3B82F6)
+                            : Colors.transparent,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -107,8 +130,12 @@ class _LayoutScrrenState extends State<LayoutScrren> {
                       _titles[index],
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                        color: selected ? const Color(0xFF0F1724) : Colors.grey.shade700,
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        color: selected
+                            ? const Color(0xFF0F1724)
+                            : Colors.grey.shade700,
                       ),
                     ),
                   ],
@@ -123,7 +150,10 @@ class _LayoutScrrenState extends State<LayoutScrren> {
             child: TextButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.logout, color: Colors.redAccent),
-              label: const Text('Logout', style: TextStyle(color: Colors.redAccent)),
+              label: const Text(
+                'Logout',
+                style: TextStyle(color: Colors.redAccent),
+              ),
             ),
           ),
         ],
@@ -145,7 +175,9 @@ class _LayoutScrrenState extends State<LayoutScrren> {
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(16.0),
-                child: Text('No patient selected. Please select a patient from the Patients screen.'),
+                child: Text(
+                  'No patient selected. Please select a patient from the Patients screen.',
+                ),
               ),
             );
           }
@@ -168,61 +200,80 @@ class _LayoutScrrenState extends State<LayoutScrren> {
         }
 
       case 2:
-           final cubit = context.read<PatientCubit>();
-          final state = cubit.state;
-          if (state.selectedIds.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text('No patient selected. Please select a patient from the Patients screen.'),
+        final cubit = context.read<PatientCubit>();
+        final state = cubit.state;
+        if (state.selectedIds.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'No patient selected. Please select a patient from the Patients screen.',
               ),
-            );
-          }
+            ),
+          );
+        }
 
-          final selectedId = state.selectedIds.first;
-          Patient? patient;
-          try {
-            patient = state.patients.firstWhere((p) => p.id == selectedId);
-          } catch (_) {
-            patient = null;
-          }
+        final selectedId = state.selectedIds.first;
+        Patient? patient;
+        try {
+          patient = state.patients.firstWhere((p) => p.id == selectedId);
+        } catch (_) {
+          patient = null;
+        }
 
-          if (patient == null) {
-            return const Center(child: Text('Selected patient not found.'));
-          }
+        if (patient == null) {
+          return const Center(child: Text('Selected patient not found.'));
+        }
         return PatientHistoryScreen(patient: patient);
-      default:
-                 final cubit = context.read<PatientCubit>();
-          final state = cubit.state;
-          if (state.selectedIds.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text('No patient selected. Please select a patient from the Patients screen.'),
+      case 3:
+        final cubit = context.read<PatientCubit>();
+        final state = cubit.state;
+        if (state.selectedIds.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'No patient selected. Please select a patient from the Patients screen.',
               ),
-            );
-          }
+            ),
+          );
+        }
 
-          final selectedId = state.selectedIds.first;
-          Patient? patient;
-          try {
-            patient = state.patients.firstWhere((p) => p.id == selectedId);
-          } catch (_) {
-            patient = null;
-          }
+        final selectedId = state.selectedIds.first;
+        Patient? patient;
+        try {
+          patient = state.patients.firstWhere((p) => p.id == selectedId);
+        } catch (_) {
+          patient = null;
+        }
 
-          if (patient == null) {
-            return const Center(child: Text('Selected patient not found.'));
-          }
+        if (patient == null) {
+          return const Center(child: Text('Selected patient not found.'));
+        }
         return BlocProvider(
           create: (_) => ExaminationCubit(),
           child: ExaminationScreen(),
+        );
+
+      case 4:
+        return BlocProvider(
+          create: (BuildContext context) {
+            return LabsCubit();
+          },
+          child: LabsScreen(),
+        );
+      default:
+        return Center(
+          child: Text(
+            'No view implemented for "${_titles[_selectedIndex]}" yet.',
+            style: const TextStyle(fontSize: 18, color: Colors.grey),
+          ),
         );
     }
   }
 
   Widget _patientsView() {
-    return PatientScreen () ;
+    return PatientScreen();
   }
 
   Widget _appointmentsView() {
@@ -232,13 +283,22 @@ class _LayoutScrrenState extends State<LayoutScrren> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          const Text('Appointments', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0F1724))),
+          const Text(
+            'Appointments',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0F1724),
+            ),
+          ),
           const SizedBox(height: 12),
           Expanded(
             child: ListView(
               children: List.generate(5, (i) {
                 return Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(10),
@@ -246,14 +306,19 @@ class _LayoutScrrenState extends State<LayoutScrren> {
                         color: Colors.purple.shade50,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text('10:${i}0', style: const TextStyle(color: Color(0xFF6D28D9))),
+                      child: Text(
+                        '10:${i}0',
+                        style: const TextStyle(color: Color(0xFF6D28D9)),
+                      ),
                     ),
                     title: Text('Patient ${i + 1}'),
                     subtitle: const Text('Checkup'),
                     trailing: ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                       child: const Text('Open'),
                     ),
@@ -272,9 +337,16 @@ class _LayoutScrrenState extends State<LayoutScrren> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.folder_open_rounded, size: 64, color: Colors.blue.shade300),
+          Icon(
+            Icons.folder_open_rounded,
+            size: 64,
+            color: Colors.blue.shade300,
+          ),
           const SizedBox(height: 16),
-          const Text('Medical Records', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const Text(
+            'Medical Records',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           const Text('Access patient files and history'),
         ],
@@ -288,10 +360,15 @@ class _LayoutScrrenState extends State<LayoutScrren> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Settings', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          const Text(
+            'Settings',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 12),
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: SwitchListTile(
               title: const Text('Enable Notifications'),
               value: true,
@@ -300,7 +377,9 @@ class _LayoutScrrenState extends State<LayoutScrren> {
           ),
           const SizedBox(height: 12),
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: ListTile(
               title: const Text('Account'),
               leading: const Icon(Icons.person_outline),
