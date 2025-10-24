@@ -25,6 +25,8 @@ import 'package:clinic/features/managers/labs/coagulation_profile/coagulation_pr
 import 'package:clinic/features/widgets/coagulation_profile_section_widgets.dart';
 import 'package:clinic/features/managers/labs/celiac_disease_labs/celiac_disease_labs_cubit.dart';
 import 'package:clinic/features/widgets/celiac_disease_labs_section_widgets.dart';
+import 'package:clinic/features/managers/labs/tumor_markers/tumor_markers_cubit.dart';
+import 'package:clinic/features/widgets/tumor_markers_section_widgets.dart';
 
 class LabsScreen extends StatelessWidget {
   final Patient patient;
@@ -77,6 +79,10 @@ class LabsScreen extends StatelessWidget {
         BlocProvider(
           create: (_) => CeliacDiseaseLabsCubit()..loadForPatient(patient.id!, force: true),
         ),
+        // Provide TumorMarkersCubit for this screen
+        BlocProvider(
+          create: (_) => TumorMarkersCubit()..loadForPatient(patient.id!, force: true),
+        ),
         // Note: AutoimmuneMarkersCubit is provided by the parent (LayoutScreen) so we do not attempt to re-read it here.
       ],
       child: SingleChildScrollView(
@@ -105,6 +111,8 @@ class LabsScreen extends StatelessWidget {
             CoagulationProfileSection(patient: patient),
             const SizedBox(height: 12),
             CeliacDiseaseLabsSection(patient: patient),
+            const SizedBox(height: 12),
+            TumorMarkersSection(patient: patient),
             const SizedBox(height: 12),
             ThyroidProfileSection(patient: patient),
             const SizedBox(height: 24),

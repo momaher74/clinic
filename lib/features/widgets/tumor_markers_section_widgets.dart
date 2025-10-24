@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:clinic/core/models/patient.dart';
-import 'package:clinic/core/models/celiac_disease_labs.dart';
-import 'package:clinic/features/managers/labs/celiac_disease_labs/celiac_disease_labs_cubit.dart';
+import 'package:clinic/core/models/tumor_markers.dart';
+import 'package:clinic/features/managers/labs/tumor_markers/tumor_markers_cubit.dart';
 
-class CeliacDiseaseLabsSection extends StatelessWidget {
+class TumorMarkersSection extends StatelessWidget {
   final Patient patient;
-  const CeliacDiseaseLabsSection({super.key, required this.patient});
+  const TumorMarkersSection({Key? key, required this.patient}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
-        context.read<CeliacDiseaseLabsCubit>().loadForPatient(patient.id!, force: true);
+        context.read<TumorMarkersCubit>().loadForPatient(patient.id!, force: true);
       } catch (_) {}
     });
 
-    return BlocBuilder<CeliacDiseaseLabsCubit, CeliacDiseaseLabsState>(
+    return BlocBuilder<TumorMarkersCubit, TumorMarkersState>(
       builder: (context, state) {
         if (state.isLoading) return const Center(child: CircularProgressIndicator());
 
@@ -26,7 +26,7 @@ class CeliacDiseaseLabsSection extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Celiac Disease Labs', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const Text('Tumor Markers', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 _buildAddButton(context),
               ],
             ),
@@ -41,7 +41,7 @@ class CeliacDiseaseLabsSection extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Celiac Disease Labs', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text('Tumor Markers', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   _buildAddButton(context),
                 ],
               ),
@@ -81,7 +81,7 @@ class CeliacDiseaseLabsSection extends StatelessWidget {
               children: const [
                 Icon(Icons.add, color: Colors.white, size: 18),
                 SizedBox(width: 8),
-                Text('Add Celiac', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                Text('Add Tumor', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
               ],
             ),
           ),
@@ -90,7 +90,7 @@ class CeliacDiseaseLabsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildCard(BuildContext context, CeliacDiseaseLabs item) {
+  Widget _buildCard(BuildContext context, TumorMarkers item) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
@@ -111,7 +111,7 @@ class CeliacDiseaseLabsSection extends StatelessWidget {
           const SizedBox(width: 12),
           const Padding(
             padding: EdgeInsets.only(left: 6, right: 6),
-            child: CircleAvatar(radius: 22, backgroundColor: Color(0xFFEEF2FF), child: Icon(Icons.dashboard, color: Color(0xFF3B82F6))),
+            child: CircleAvatar(radius: 22, backgroundColor: Color(0xFFEEF2FF), child: Icon(Icons.biotech, color: Color(0xFF3B82F6))),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -126,14 +126,13 @@ class CeliacDiseaseLabsSection extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 6,
                     children: [
-                      _infoChip('AGA IgA', item.agaIgA),
-                      _infoChip('AGA IgG', item.agaIgG),
-                      _infoChip('EMA IgA', item.emaIgA),
-                      _infoChip('tTG IgA', item.ttgIgA),
-                      _infoChip('tTG IgG', item.ttgIgG),
-                      _infoChip('DGP IgA', item.dgpIgA),
-                      _infoChip('DGP IgG', item.dgpIgG),
-                      _infoChip('Total IgA', item.totalIgA?.toString()),
+                      _infoChip('CA19-9', item.ca19_9?.toString()),
+                      _infoChip('CA125', item.ca125?.toString()),
+                      _infoChip('CA15-3', item.ca15_3?.toString()),
+                      _infoChip('CEA', item.cea?.toString()),
+                      _infoChip('AFP', item.afp?.toString()),
+                      _infoChip('PSA Total', item.psaTotal?.toString()),
+                      _infoChip('PSA Free', item.psaFree?.toString()),
                     ],
                   ),
                 ],
@@ -142,7 +141,7 @@ class CeliacDiseaseLabsSection extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(onPressed: item.id == null ? null : () => context.read<CeliacDiseaseLabsCubit>().delete(item.id!), icon: const Icon(Icons.delete_outline, color: Colors.grey)),
+            child: IconButton(onPressed: item.id == null ? null : () => context.read<TumorMarkersCubit>().delete(item.id!), icon: const Icon(Icons.delete_outline, color: Colors.grey)),
           ),
         ],
       ),
@@ -160,7 +159,7 @@ class CeliacDiseaseLabsSection extends StatelessWidget {
   void _showAddDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (dialogContext) => BlocProvider.value(value: context.read<CeliacDiseaseLabsCubit>(), child: AddCeliacDialog(patientId: patient.id!)),
+      builder: (dialogContext) => BlocProvider.value(value: context.read<TumorMarkersCubit>(), child: AddTumorDialog(patientId: patient.id!)),
     );
   }
 
@@ -173,26 +172,25 @@ class CeliacDiseaseLabsSection extends StatelessWidget {
   }
 }
 
-class AddCeliacDialog extends StatefulWidget {
+class AddTumorDialog extends StatefulWidget {
   final int patientId;
-  const AddCeliacDialog({Key? key, required this.patientId}) : super(key: key);
+  const AddTumorDialog({Key? key, required this.patientId}) : super(key: key);
 
   @override
-  State<AddCeliacDialog> createState() => _AddCeliacDialogState();
+  State<AddTumorDialog> createState() => _AddTumorDialogState();
 }
 
-class _AddCeliacDialogState extends State<AddCeliacDialog> {
+class _AddTumorDialogState extends State<AddTumorDialog> {
   final _formKey = GlobalKey<FormState>();
   DateTime? _date;
 
-  final agaA = TextEditingController();
-  final agaG = TextEditingController();
-  final emaA = TextEditingController();
-  final ttgA = TextEditingController();
-  final ttgG = TextEditingController();
-  final dgpA = TextEditingController();
-  final dgpG = TextEditingController();
-  final totalIgACtrl = TextEditingController();
+  final ca199 = TextEditingController();
+  final ca125 = TextEditingController();
+  final ca153 = TextEditingController();
+  final cea = TextEditingController();
+  final afp = TextEditingController();
+  final psaTotal = TextEditingController();
+  final psaFree = TextEditingController();
 
   @override
   void initState() {
@@ -202,14 +200,13 @@ class _AddCeliacDialogState extends State<AddCeliacDialog> {
 
   @override
   void dispose() {
-    agaA.dispose();
-    agaG.dispose();
-    emaA.dispose();
-    ttgA.dispose();
-    ttgG.dispose();
-    dgpA.dispose();
-    dgpG.dispose();
-    totalIgACtrl.dispose();
+    ca199.dispose();
+    ca125.dispose();
+    ca153.dispose();
+    cea.dispose();
+    afp.dispose();
+    psaTotal.dispose();
+    psaFree.dispose();
     super.dispose();
   }
 
@@ -222,26 +219,23 @@ class _AddCeliacDialogState extends State<AddCeliacDialog> {
   void _submit() async {
     if (!_formKey.currentState!.validate() || _date == null) return;
 
-    final item = CeliacDiseaseLabs(
+    final item = TumorMarkers(
       patientId: widget.patientId,
       date: _date!.toIso8601String(),
-      agaIgA: agaA.text.trim().isEmpty ? null : agaA.text.trim(),
-      agaIgG: agaG.text.trim().isEmpty ? null : agaG.text.trim(),
-      emaIgA: emaA.text.trim().isEmpty ? null : emaA.text.trim(),
-      ttgIgA: ttgA.text.trim().isEmpty ? null : ttgA.text.trim(),
-      ttgIgG: ttgG.text.trim().isEmpty ? null : ttgG.text.trim(),
-      dgpIgA: dgpA.text.trim().isEmpty ? null : dgpA.text.trim(),
-      dgpIgG: dgpG.text.trim().isEmpty ? null : dgpG.text.trim(),
-      totalIgA: _parseNum(totalIgACtrl),
+      ca19_9: _parseNum(ca199),
+      ca125: _parseNum(ca125),
+      ca15_3: _parseNum(ca153),
+      cea: _parseNum(cea),
+      afp: _parseNum(afp),
+      psaTotal: _parseNum(psaTotal),
+      psaFree: _parseNum(psaFree),
       createdAt: DateTime.now().toIso8601String(),
     );
 
     try {
-      await context.read<CeliacDiseaseLabsCubit>().add(item);
+      await context.read<TumorMarkersCubit>().add(item);
       Navigator.of(context).pop();
-    } catch (e) {
-      // ignore
-    }
+    } catch (_) {}
   }
 
   Future<void> _pickDate() async {
@@ -268,7 +262,7 @@ class _AddCeliacDialogState extends State<AddCeliacDialog> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 child: Row(
                   children: [
-                    const Text('Add Celiac Disease Labs', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text('Add Tumor Markers', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                     const Spacer(),
                     IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: () => Navigator.of(context).pop()),
                   ],
@@ -290,62 +284,19 @@ class _AddCeliacDialogState extends State<AddCeliacDialog> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      TextFormField(
-                        controller: agaA,
-                        decoration: InputDecoration(labelText: 'AGA IgA', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                        validator: (_) => null,
-                      ),
+                      TextFormField(controller: ca199, decoration: InputDecoration(labelText: 'CA19-9', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50), keyboardType: TextInputType.numberWithOptions(decimal: true), validator: (_) => null),
                       const SizedBox(height: 8),
-                      TextFormField(
-                        controller: agaG,
-                        decoration: InputDecoration(labelText: 'AGA IgG', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                        validator: (_) => null,
-                      ),
+                      TextFormField(controller: ca125, decoration: InputDecoration(labelText: 'CA125', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50), keyboardType: TextInputType.numberWithOptions(decimal: true), validator: (_) => null),
                       const SizedBox(height: 8),
-                      TextFormField(
-                        controller: emaA,
-                        decoration: InputDecoration(labelText: 'EMA IgA', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                        validator: (_) => null,
-                      ),
+                      TextFormField(controller: ca153, decoration: InputDecoration(labelText: 'CA15-3', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50), keyboardType: TextInputType.numberWithOptions(decimal: true), validator: (_) => null),
                       const SizedBox(height: 8),
-                      TextFormField(
-                        controller: ttgA,
-                        decoration: InputDecoration(labelText: 'tTG IgA', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                        validator: (_) => null,
-                      ),
+                      TextFormField(controller: cea, decoration: InputDecoration(labelText: 'CEA', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50), keyboardType: TextInputType.numberWithOptions(decimal: true), validator: (_) => null),
                       const SizedBox(height: 8),
-                      TextFormField(
-                        controller: ttgG,
-                        decoration: InputDecoration(labelText: 'tTG IgG', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                        validator: (_) => null,
-                      ),
+                      TextFormField(controller: afp, decoration: InputDecoration(labelText: 'AFP', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50), keyboardType: TextInputType.numberWithOptions(decimal: true), validator: (_) => null),
                       const SizedBox(height: 8),
-                      TextFormField(
-                        controller: dgpA,
-                        decoration: InputDecoration(labelText: 'DGP IgA', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                        validator: (_) => null,
-                      ),
+                      TextFormField(controller: psaTotal, decoration: InputDecoration(labelText: 'PSA Total', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50), keyboardType: TextInputType.numberWithOptions(decimal: true), validator: (_) => null),
                       const SizedBox(height: 8),
-                      TextFormField(
-                        controller: dgpG,
-                        decoration: InputDecoration(labelText: 'DGP IgG', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                        validator: (_) => null,
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: totalIgACtrl,
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
-                        decoration: InputDecoration(labelText: 'Total IgA', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                        validator: (_) => null,
-                      ),
+                      TextFormField(controller: psaFree, decoration: InputDecoration(labelText: 'PSA Free', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50), keyboardType: TextInputType.numberWithOptions(decimal: true), validator: (_) => null),
                       const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
