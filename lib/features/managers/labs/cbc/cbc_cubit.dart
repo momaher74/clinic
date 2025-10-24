@@ -15,15 +15,28 @@ class CbcState {
 
 class CbcCubit extends Cubit<CbcState> {
   final DatabaseService _db = DatabaseService();
+  int? _loadedPatientId;
+  bool _tableCreated = false;
 
   CbcCubit() : super(CbcState());
 
-  Future<void> loadForPatient(int pid) async {
+  Future<void> loadForPatient(int pid, {bool force = false}) async {
+    // avoid reloading if we already loaded this patient and not forced
+    if (!force && _loadedPatientId == pid && state.list.isNotEmpty) return;
+    _loadedPatientId = pid;
+
     emit(state.copyWith(isLoading: true));
-    await _db.createTableWithAttributes('cbc', ['patient_id','date','hb','rbcs','mcv','mch','tlc','neut','lymph','mono','eos','baso','ptt','created_at']);
+    if (!_tableCreated) {
+      await _db.createTableWithAttributes('cbc', ['patient_id','date','hb','rbcs','mcv','mch','tlc','neut','lymph','mono','eos','baso','ptt','created_at']);
+      _tableCreated = true;
+    }
     final rows = await _db.getAll('cbc');
     final all = rows.map((r) => Cbc.fromMap(r)).where((c) => c.patientId == pid).toList();
     emit(state.copyWith(isLoading: false, list: all));
+  }
+
+  void resetLoaded() {
+    _loadedPatientId = null;
   }
 
   Future<void> add(Cbc c) async {
