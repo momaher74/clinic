@@ -1,3 +1,4 @@
+import 'package:clinic/core/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:clinic/core/models/patient.dart';
@@ -34,19 +35,28 @@ class EndoscopyScreen extends StatelessWidget {
       ],
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            OgdSection(patient: patient),
-            const SizedBox(height: 12),
-            ColonoscopySection(patient: patient),
-            const SizedBox(height: 12),
-            ErcpSection(patient: patient),
-            const SizedBox(height: 12),
-            EusSection(patient: patient),
-            const SizedBox(height: 24),
-          ],
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            // ensure the column fills at least the viewport height so its children stay at the top
+            minHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - kToolbarHeight,
+          ),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                OgdSection(patient: patient),
+                 sharedDivider(),
+                ColonoscopySection(patient: patient),
+                sharedDivider(),
+                ErcpSection(patient: patient),
+                sharedDivider(),
+                EusSection(patient: patient),
+                sharedDivider(),
+              ],
+            ),
+          ),
         ),
       ),
     );

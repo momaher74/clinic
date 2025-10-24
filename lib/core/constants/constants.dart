@@ -31,3 +31,15 @@ Color primaryColor = Color(0xFF3B82F6);
       ),
     );
   }
+
+
+
+
+Widget sharedDivider(){
+
+  return Container(
+    margin: const EdgeInsets.symmetric(vertical: 12),
+    height: 2,  width: double.infinity , decoration: BoxDecoration(
+      color: Colors.grey
+  ),) ; 
+}
