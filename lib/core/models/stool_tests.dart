@@ -23,29 +23,29 @@ class StoolTests {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'patient_id': patientId,
+      if (id != null) 'id': id,
+      'patient_id': patientId.toString(),
       'date': date,
-      'occult_in_stool': occultInStool,
-      'h_pylori_ag_in_stool': hPyloriAgInStool,
-      'fecal_calprotectin': fecalCalprotectin,
-      'stool_analysis': stoolAnalysis,
-      'fit_test': fitTest,
+      'occult_in_stool': occultInStool ?? '',
+      'h_pylori_ag_in_stool': hPyloriAgInStool ?? '',
+      'fecal_calprotectin': fecalCalprotectin ?? '',
+      'stool_analysis': stoolAnalysis ?? '',
+      'fit_test': fitTest ?? '',
       'created_at': createdAt,
     };
   }
 
   factory StoolTests.fromMap(Map<String, dynamic> map) {
     return StoolTests(
-      id: map['id'],
-      patientId: map['patient_id'],
-      date: map['date'],
-      occultInStool: map['occult_in_stool'],
-      hPyloriAgInStool: map['h_pylori_ag_in_stool'],
-      fecalCalprotectin: map['fecal_calprotectin'],
-      stoolAnalysis: map['stool_analysis'],
-      fitTest: map['fit_test'],
-      createdAt: map['created_at'],
+      id: map['id'] is int ? map['id'] : int.tryParse(map['id'].toString()),
+      patientId: map['patient_id'] is int ? map['patient_id'] : int.parse(map['patient_id'].toString()),
+      date: map['date']?.toString() ?? '',
+      occultInStool: map['occult_in_stool']?.toString().isEmpty ?? true ? null : map['occult_in_stool']?.toString(),
+      hPyloriAgInStool: map['h_pylori_ag_in_stool']?.toString().isEmpty ?? true ? null : map['h_pylori_ag_in_stool']?.toString(),
+      fecalCalprotectin: map['fecal_calprotectin']?.toString().isEmpty ?? true ? null : map['fecal_calprotectin']?.toString(),
+      stoolAnalysis: map['stool_analysis']?.toString().isEmpty ?? true ? null : map['stool_analysis']?.toString(),
+      fitTest: map['fit_test']?.toString().isEmpty ?? true ? null : map['fit_test']?.toString(),
+      createdAt: map['created_at']?.toString() ?? DateTime.now().toIso8601String(),
     );
   }
 }

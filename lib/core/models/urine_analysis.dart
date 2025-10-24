@@ -15,21 +15,21 @@ class UrineAnalysis {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'patient_id': patientId,
+      if (id != null) 'id': id,
+      'patient_id': patientId.toString(),
       'date': date,
-      'note': note,
+      'note': note ?? '',
       'created_at': createdAt,
     };
   }
 
   factory UrineAnalysis.fromMap(Map<String, dynamic> map) {
     return UrineAnalysis(
-      id: map['id'],
-      patientId: map['patient_id'],
-      date: map['date'],
-      note: map['note'],
-      createdAt: map['created_at'],
+      id: map['id'] is int ? map['id'] : int.tryParse(map['id'].toString()),
+      patientId: map['patient_id'] is int ? map['patient_id'] : int.parse(map['patient_id'].toString()),
+      date: map['date']?.toString() ?? '',
+      note: map['note']?.toString().isEmpty ?? true ? null : map['note']?.toString(),
+      createdAt: map['created_at']?.toString() ?? DateTime.now().toIso8601String(),
     );
   }
 }

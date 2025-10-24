@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class DatabaseService {
@@ -17,13 +18,19 @@ class DatabaseService {
     return _db!;
   }
 
-  /// Initialize the database for desktop (FFI)
+  /// Initialize the database
   Future<Database> _initDatabase() async {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-
-    final Directory appDir = await getApplicationSupportDirectory();
-    final dbPath = join(appDir.path, 'app_database.db');
+    late String dbPath;
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      // For desktop
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+      final Directory appDir = await getApplicationSupportDirectory();
+      dbPath = join(appDir.path, 'app_database.db');
+    } else {
+      // For mobile
+      dbPath = join(await sqflite.getDatabasesPath(), 'app_database.db');
+    }
 
     return await databaseFactory.openDatabase(
       dbPath,

@@ -256,12 +256,42 @@ class _LayoutScrrenState extends State<LayoutScrren> {
         );
 
       case 4:
-        return BlocProvider(
-          create: (BuildContext context) {
-            return LabsCubit();
-          },
-          child: LabsScreen(),
-        );
+        // Safely read selected patient from PatientCubit
+        try {
+          final cubit = context.read<PatientCubit>();
+          final state = cubit.state;
+          if (state.selectedIds.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'No patient selected. Please select a patient from the Patients screen.',
+                ),
+              ),
+            );
+          }
+
+          final selectedId = state.selectedIds.first;
+          Patient? patient;
+          try {
+            patient = state.patients.firstWhere((p) => p.id == selectedId);
+          } catch (_) {
+            patient = null;
+          }
+
+          if (patient == null) {
+            return const Center(child: Text('Selected patient not found.'));
+          }
+
+          return BlocProvider(
+            create: (BuildContext context) {
+              return LabsCubit();
+            },
+            child: LabsScreen(patient: patient),
+          );
+        } catch (e) {
+          return Center(child: Text('Error accessing patient selection: $e'));
+        }
       default:
         return Center(
           child: Text(

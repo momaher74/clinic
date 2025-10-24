@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:clinic/features/managers/add_user/add_user/patient_state.dart';
 import 'package:clinic/core/services/sql_service.dart';
 import 'package:clinic/core/models/patient.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PatientCubit extends Cubit<PatientState> {
 	final DatabaseService _db = DatabaseService();
@@ -14,6 +15,7 @@ class PatientCubit extends Cubit<PatientState> {
 			await _db.createTableWithAttributes('patients', ['name','birthdate','age','sex','residency','mobile','note']);
 			final rows = await _db.getAll('patients');
 			final list = rows.map((r) => Patient.fromMap(r)).toList();
+			await loadSelectedIds();
 			emit(state.copyWith(isLoading: false, patients: list, filtered: list));
 		} catch (e) {
 			emit(state.copyWith(isLoading: false, error: e.toString()));
@@ -43,13 +45,15 @@ class PatientCubit extends Cubit<PatientState> {
 		}
 	}
 
-	void toggleSelection(int id) {
+	void toggleSelection(int id) async {
 		// Enforce single-selection: select the id or deselect if already selected
 		final newSelected = <int>{};
 		if (!state.selectedIds.contains(id)) {
 			newSelected.add(id);
 		}
 		emit(state.copyWith(selectedIds: newSelected));
+		final prefs = await SharedPreferences.getInstance();
+		await prefs.setStringList('selected_patient_ids', newSelected.map((i) => i.toString()).toList());
 	}
 
 	void search(String q) {
@@ -62,5 +66,12 @@ class PatientCubit extends Cubit<PatientState> {
 		return list.where((p) {
 			return p.name.toLowerCase().contains(query) || p.mobile.toLowerCase().contains(query) || p.residency.toLowerCase().contains(query);
 		}).toList();
+	}
+
+	Future<void> loadSelectedIds() async {
+		final prefs = await SharedPreferences.getInstance();
+		final selected = prefs.getStringList('selected_patient_ids') ?? [];
+		final ids = selected.map((s) => int.tryParse(s)).whereType<int>().toSet();
+		emit(state.copyWith(selectedIds: ids));
 	}
 }

@@ -1,73 +1,62 @@
+import 'package:bloc/bloc.dart';
 import 'package:clinic/core/models/vitamin_level.dart';
 import 'package:clinic/core/services/sql_service.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-part 'vitamin_level_state.dart';
+class VitaminLevelState {
+  final bool isLoading;
+  final String? error;
+  final List<VitaminLevel> list;
+
+  VitaminLevelState({this.isLoading = false, this.error, this.list = const []});
+
+  VitaminLevelState copyWith({bool? isLoading, String? error, List<VitaminLevel>? list}) =>
+      VitaminLevelState(isLoading: isLoading ?? this.isLoading, error: error ?? this.error, list: list ?? this.list);
+}
 
 class VitaminLevelCubit extends Cubit<VitaminLevelState> {
   final DatabaseService _db = DatabaseService();
   int? _loadedPatientId;
   bool _tableCreated = false;
 
-  VitaminLevelCubit() : super(VitaminLevelInitial());
+  VitaminLevelCubit() : super(VitaminLevelState());
 
   Future<void> loadForPatient(int pid, {bool force = false}) async {
-    if (!force && _loadedPatientId == pid && state is VitaminLevelLoaded) return;
+    if (!force && _loadedPatientId == pid && state.list.isNotEmpty) return;
     _loadedPatientId = pid;
 
-    try {
-      emit(VitaminLevelLoading());
-      if (!_tableCreated) {
-        await _db.createTableWithAttributes('vitamin_level', [
-          'patient_id', 'date', 'vit_d_level', 'vit_b12_level', 'created_at'
-        ]);
-        _tableCreated = true;
-      }
-      final rows = await _db.getAll('vitamin_level');
-      final records = rows.map((r) => VitaminLevel.fromMap(r)).where((c) => c.patientId == pid).toList();
-      emit(VitaminLevelLoaded(records));
-    } catch (e) {
-      emit(VitaminLevelError(e.toString()));
+    emit(state.copyWith(isLoading: true));
+    if (!_tableCreated) {
+      await _db.createTableWithAttributes('vitamin_level', [
+        'patient_id', 'date', 'vit_d_level', 'vit_b12_level', 'created_at'
+      ]);
+      _tableCreated = true;
     }
+    final rows = await _db.getAll('vitamin_level');
+    final all = rows.map((r) => VitaminLevel.fromMap(r)).where((c) => c.patientId == pid).toList();
+    emit(state.copyWith(isLoading: false, list: all));
   }
 
   void resetLoaded() {
     _loadedPatientId = null;
   }
 
-  Future<void> add(VitaminLevel record) async {
-    try {
-      final id = await _db.insert('vitamin_level', record.toMap());
-      if (state is VitaminLevelLoaded) {
-        final current = (state as VitaminLevelLoaded).records;
-        final updatedRecord = VitaminLevel(
-          id: id,
-          patientId: record.patientId,
-          date: record.date,
-          vitDLevel: record.vitDLevel,
-          vitB12Level: record.vitB12Level,
-          createdAt: record.createdAt,
-        );
-        emit(VitaminLevelLoaded([updatedRecord, ...current]));
-      }
-    } catch (e) {
-      emit(VitaminLevelError(e.toString()));
-    }
+  Future<void> add(VitaminLevel c) async {
+    final id = await _db.insert('vitamin_level', c.toMap());
+    final updatedRecord = VitaminLevel(
+      id: id,
+      patientId: c.patientId,
+      date: c.date,
+      vitDLevel: c.vitDLevel,
+      vitB12Level: c.vitB12Level,
+      createdAt: c.createdAt,
+    );
+    final newList = [updatedRecord, ...state.list];
+    emit(state.copyWith(list: newList));
   }
 
   Future<void> delete(int id) async {
-    try {
-      await _db.delete('vitamin_level', id);
-      if (state is VitaminLevelLoaded) {
-        final current = (state as VitaminLevelLoaded).records;
-        emit(VitaminLevelLoaded(current.where((r) => r.id != id).toList()));
-      }
-    } catch (e) {
-      emit(VitaminLevelError(e.toString()));
-    }
-  }
-
-  void reset() {
-    emit(VitaminLevelInitial());
+    await _db.delete('vitamin_level', id);
+    final newList = List<VitaminLevel>.from(state.list)..removeWhere((c) => c.id == id);
+    emit(state.copyWith(list: newList));
   }
 }

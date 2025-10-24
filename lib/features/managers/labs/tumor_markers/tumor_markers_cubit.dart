@@ -1,79 +1,67 @@
+import 'package:bloc/bloc.dart';
 import 'package:clinic/core/models/tumor_markers.dart';
 import 'package:clinic/core/services/sql_service.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-part 'tumor_markers_state.dart';
+class TumorMarkersState {
+  final bool isLoading;
+  final String? error;
+  final List<TumorMarkers> list;
+
+  TumorMarkersState({this.isLoading = false, this.error, this.list = const []});
+
+  TumorMarkersState copyWith({bool? isLoading, String? error, List<TumorMarkers>? list}) =>
+      TumorMarkersState(isLoading: isLoading ?? this.isLoading, error: error ?? this.error, list: list ?? this.list);
+}
 
 class TumorMarkersCubit extends Cubit<TumorMarkersState> {
   final DatabaseService _db = DatabaseService();
   int? _loadedPatientId;
   bool _tableCreated = false;
 
-  TumorMarkersCubit() : super(TumorMarkersInitial());
+  TumorMarkersCubit() : super(TumorMarkersState());
 
   Future<void> loadForPatient(int pid, {bool force = false}) async {
-    // avoid reloading if we already loaded this patient and not forced
-    if (!force && _loadedPatientId == pid && state is TumorMarkersLoaded) return;
+    if (!force && _loadedPatientId == pid && state.list.isNotEmpty) return;
     _loadedPatientId = pid;
 
-    try {
-      emit(TumorMarkersLoading());
-      if (!_tableCreated) {
-        await _db.createTableWithAttributes('tumor_markers', [
-          'patient_id', 'date', 'ca19_9', 'ca125', 'ca15_3', 'cea', 'afp', 'psa_total', 'psa_free', 'created_at'
-        ]);
-        _tableCreated = true;
-      }
-      final rows = await _db.getAll('tumor_markers');
-      final records = rows.map((r) => TumorMarkers.fromMap(r)).where((c) => c.patientId == pid).toList();
-      emit(TumorMarkersLoaded(records));
-    } catch (e) {
-      emit(TumorMarkersError(e.toString()));
+    emit(state.copyWith(isLoading: true));
+    if (!_tableCreated) {
+      await _db.createTableWithAttributes('tumor_markers', [
+        'patient_id', 'date', 'ca19_9', 'ca125', 'ca15_3', 'cea', 'afp', 'psa_total', 'psa_free', 'created_at'
+      ]);
+      _tableCreated = true;
     }
+    final rows = await _db.getAll('tumor_markers');
+    final all = rows.map((r) => TumorMarkers.fromMap(r)).where((c) => c.patientId == pid).toList();
+    emit(state.copyWith(isLoading: false, list: all));
   }
 
   void resetLoaded() {
     _loadedPatientId = null;
   }
 
-  Future<void> add(TumorMarkers record) async {
-    try {
-      final id = await _db.insert('tumor_markers', record.toMap());
-      if (state is TumorMarkersLoaded) {
-        final current = (state as TumorMarkersLoaded).records;
-        final updatedRecord = TumorMarkers(
-          id: id,
-          patientId: record.patientId,
-          date: record.date,
-          ca19_9: record.ca19_9,
-          ca125: record.ca125,
-          ca15_3: record.ca15_3,
-          cea: record.cea,
-          afp: record.afp,
-          psaTotal: record.psaTotal,
-          psaFree: record.psaFree,
-          createdAt: record.createdAt,
-        );
-        emit(TumorMarkersLoaded([updatedRecord, ...current]));
-      }
-    } catch (e) {
-      emit(TumorMarkersError(e.toString()));
-    }
+  Future<void> add(TumorMarkers c) async {
+    final id = await _db.insert('tumor_markers', c.toMap());
+    final updatedRecord = TumorMarkers(
+      id: id,
+      patientId: c.patientId,
+      date: c.date,
+      ca19_9: c.ca19_9,
+      ca125: c.ca125,
+      ca15_3: c.ca15_3,
+      cea: c.cea,
+      afp: c.afp,
+      psaTotal: c.psaTotal,
+      psaFree: c.psaFree,
+      createdAt: c.createdAt,
+    );
+    final newList = [updatedRecord, ...state.list];
+    emit(state.copyWith(list: newList));
   }
 
   Future<void> delete(int id) async {
-    try {
-      await _db.delete('tumor_markers', id);
-      if (state is TumorMarkersLoaded) {
-        final current = (state as TumorMarkersLoaded).records;
-        emit(TumorMarkersLoaded(current.where((r) => r.id != id).toList()));
-      }
-    } catch (e) {
-      emit(TumorMarkersError(e.toString()));
-    }
-  }
-
-  void reset() {
-    emit(TumorMarkersInitial());
+    await _db.delete('tumor_markers', id);
+    final newList = List<TumorMarkers>.from(state.list)..removeWhere((c) => c.id == id);
+    emit(state.copyWith(list: newList));
   }
 }

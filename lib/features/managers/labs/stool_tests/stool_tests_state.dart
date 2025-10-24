@@ -1,4 +1,5 @@
-part of 'stool_tests_cubit.dart';
+
+import 'package:clinic/core/models/stool_tests.dart';
 
 abstract class StoolTestsState {}
 

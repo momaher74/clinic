@@ -1,75 +1,64 @@
+import 'package:bloc/bloc.dart';
 import 'package:clinic/core/models/iron_profile.dart';
 import 'package:clinic/core/services/sql_service.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-part 'iron_profile_state.dart';
+class IronProfileState {
+  final bool isLoading;
+  final String? error;
+  final List<IronProfile> list;
+
+  IronProfileState({this.isLoading = false, this.error, this.list = const []});
+
+  IronProfileState copyWith({bool? isLoading, String? error, List<IronProfile>? list}) =>
+      IronProfileState(isLoading: isLoading ?? this.isLoading, error: error ?? this.error, list: list ?? this.list);
+}
 
 class IronProfileCubit extends Cubit<IronProfileState> {
   final DatabaseService _db = DatabaseService();
   int? _loadedPatientId;
   bool _tableCreated = false;
 
-  IronProfileCubit() : super(IronProfileInitial());
+  IronProfileCubit() : super(IronProfileState());
 
   Future<void> loadForPatient(int pid, {bool force = false}) async {
-    if (!force && _loadedPatientId == pid && state is IronProfileLoaded) return;
+    if (!force && _loadedPatientId == pid && state.list.isNotEmpty) return;
     _loadedPatientId = pid;
 
-    try {
-      emit(IronProfileLoading());
-      if (!_tableCreated) {
-        await _db.createTableWithAttributes('iron_profile', [
-          'patient_id', 'date', 's_iron', 's_ferritin', 'f_transferrin_sat', 'tibc', 'created_at'
-        ]);
-        _tableCreated = true;
-      }
-      final rows = await _db.getAll('iron_profile');
-      final records = rows.map((r) => IronProfile.fromMap(r)).where((c) => c.patientId == pid).toList();
-      emit(IronProfileLoaded(records));
-    } catch (e) {
-      emit(IronProfileError(e.toString()));
+    emit(state.copyWith(isLoading: true));
+    if (!_tableCreated) {
+      await _db.createTableWithAttributes('iron_profile', [
+        'patient_id', 'date', 's_iron', 's_ferritin', 'f_transferrin_sat', 'tibc', 'created_at'
+      ]);
+      _tableCreated = true;
     }
+    final rows = await _db.getAll('iron_profile');
+    final all = rows.map((r) => IronProfile.fromMap(r)).where((c) => c.patientId == pid).toList();
+    emit(state.copyWith(isLoading: false, list: all));
   }
 
   void resetLoaded() {
     _loadedPatientId = null;
   }
 
-  Future<void> add(IronProfile record) async {
-    try {
-      final id = await _db.insert('iron_profile', record.toMap());
-      if (state is IronProfileLoaded) {
-        final current = (state as IronProfileLoaded).records;
-        final updatedRecord = IronProfile(
-          id: id,
-          patientId: record.patientId,
-          date: record.date,
-          sIron: record.sIron,
-          sFerritin: record.sFerritin,
-          fTransferrinSat: record.fTransferrinSat,
-          tibc: record.tibc,
-          createdAt: record.createdAt,
-        );
-        emit(IronProfileLoaded([updatedRecord, ...current]));
-      }
-    } catch (e) {
-      emit(IronProfileError(e.toString()));
-    }
+  Future<void> add(IronProfile c) async {
+    final id = await _db.insert('iron_profile', c.toMap());
+    final updatedRecord = IronProfile(
+      id: id,
+      patientId: c.patientId,
+      date: c.date,
+      sIron: c.sIron,
+      sFerritin: c.sFerritin,
+      fTransferrinSat: c.fTransferrinSat,
+      tibc: c.tibc,
+      createdAt: c.createdAt,
+    );
+    final newList = [updatedRecord, ...state.list];
+    emit(state.copyWith(list: newList));
   }
 
   Future<void> delete(int id) async {
-    try {
-      await _db.delete('iron_profile', id);
-      if (state is IronProfileLoaded) {
-        final current = (state as IronProfileLoaded).records;
-        emit(IronProfileLoaded(current.where((r) => r.id != id).toList()));
-      }
-    } catch (e) {
-      emit(IronProfileError(e.toString()));
-    }
-  }
-
-  void reset() {
-    emit(IronProfileInitial());
+    await _db.delete('iron_profile', id);
+    final newList = List<IronProfile>.from(state.list)..removeWhere((c) => c.id == id);
+    emit(state.copyWith(list: newList));
   }
 }
