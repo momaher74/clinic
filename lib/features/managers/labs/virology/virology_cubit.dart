@@ -42,6 +42,7 @@ class VirologyCubit extends Cubit<VirologyState> {
         whereArgs: [patientId],
         orderBy: 'created_at DESC',
       );
+
       final items = maps.map((m) => Virology.fromMap(m)).toList();
       emit(state.copyWith(list: items, isLoading: false));
     } catch (e) {

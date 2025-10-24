@@ -57,23 +57,31 @@ class Virology {
   }
 
   factory Virology.fromMap(Map<String, dynamic> map) {
+    int? parseNullableInt(dynamic v) {
+      if (v == null) return null;
+      if (v is int) return v;
+      return int.tryParse(v.toString());
+    }
+
+    String? parseNullableString(dynamic v) => v == null ? null : v.toString();
+
     return Virology(
-      id: map['id'],
-      patientId: map['patient_id'],
-      date: map['date'],
-      havIgm: map['hav_igm'],
-      havIgG: map['hav_igg'],
-      hbsAg: map['hbs_ag'],
-      hbsAb: map['hbs_ab'],
-      hbcIgM: map['hbc_igm'],
-      hbcIgG: map['hbc_igg'],
-      hbeAg: map['hbe_ag'],
-      hbeAb: map['hbe_ab'],
-      hcvAb: map['hcv_ab'],
-      hivAbI_II: map['hiv_ab_i_ii'],
-      hbvDnaPcr: map['hbv_dna_pcr'],
-      hcvRnaPcr: map['hcv_rna_pcr'],
-      createdAt: map['created_at'],
+      id: parseNullableInt(map['id']),
+      patientId: parseNullableInt(map['patient_id']) ?? 0,
+      date: map['date']?.toString() ?? '',
+      havIgm: parseNullableString(map['hav_igm']),
+      havIgG: parseNullableString(map['hav_igg']),
+      hbsAg: parseNullableString(map['hbs_ag']),
+      hbsAb: parseNullableString(map['hbs_ab']),
+      hbcIgM: parseNullableString(map['hbc_igm']),
+      hbcIgG: parseNullableString(map['hbc_igg']),
+      hbeAg: parseNullableString(map['hbe_ag']),
+      hbeAb: parseNullableString(map['hbe_ab']),
+      hcvAb: parseNullableString(map['hcv_ab']),
+      hivAbI_II: parseNullableString(map['hiv_ab_i_ii']),
+      hbvDnaPcr: parseNullableString(map['hbv_dna_pcr']),
+      hcvRnaPcr: parseNullableString(map['hcv_rna_pcr']),
+      createdAt: map['created_at']?.toString() ?? DateTime.now().toIso8601String(),
     );
   }
 }

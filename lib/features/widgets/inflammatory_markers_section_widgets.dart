@@ -1,35 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:clinic/core/models/patient.dart';
-import 'package:clinic/core/models/diabetes_labs.dart';
-import 'package:clinic/features/managers/labs/diabetes_labs/diabetes_labs_cubit.dart';
-import 'package:flutter/services.dart';
+import 'package:clinic/core/models/inflammatory_markers.dart';
+import 'package:clinic/features/managers/labs/inflammatory_markers/inflammatory_markers_cubit.dart';
 
-class DiabetesLabsSection extends StatelessWidget {
+class InflammatoryMarkersSection extends StatelessWidget {
   final Patient patient;
-  const DiabetesLabsSection({super.key, required this.patient});
+  const InflammatoryMarkersSection({super.key, required this.patient});
 
   @override
   Widget build(BuildContext context) {
+    // ensure data is loaded after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
-        context.read<DiabetesLabsCubit>().loadForPatient(patient.id!, force: true);
+        context.read<InflammatoryMarkersCubit>().loadForPatient(patient.id!, force: true);
       } catch (_) {}
     });
 
-    return BlocBuilder<DiabetesLabsCubit, DiabetesLabsState>(
+    return BlocBuilder<InflammatoryMarkersCubit, InflammatoryMarkersState>(
       builder: (context, state) {
         if (state.isLoading) return const Center(child: CircularProgressIndicator());
 
         if (state.list.isEmpty) {
           return Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Diabetes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                _buildAddButton(context),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text('Inflammatory Markers', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    _buildAddButton(context),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Text('No inflammatory marker records', style: TextStyle(fontSize: 13, color: Colors.black54)),
               ],
             ),
           );
@@ -41,24 +48,23 @@ class DiabetesLabsSection extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8)),
+                child: Text('Count: ${state.list.length}', style: const TextStyle(fontWeight: FontWeight.w600)),
+              ),
+              const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Diabetes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text('Inflammatory Markers', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   _buildAddButton(context),
                 ],
               ),
               const SizedBox(height: 8),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: state.list.length,
-                  itemBuilder: (context, index) {
-                    final item = state.list[index];
-                    return _buildCard(context, item);
-                  },
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: state.list.map((item) => _buildCard(context, item)).toList(),
               ),
             ],
           ),
@@ -70,9 +76,9 @@ class DiabetesLabsSection extends StatelessWidget {
   Widget _buildAddButton(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)]),
+        gradient: const LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)]),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 8, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 6, offset: const Offset(0, 4))],
       ),
       child: Material(
         color: Colors.transparent,
@@ -80,13 +86,13 @@ class DiabetesLabsSection extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           onTap: () => _showAddDialog(context),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: const [
                 Icon(Icons.add, color: Colors.white, size: 18),
                 SizedBox(width: 8),
-                Text('Add Diabetes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                Text('Add', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
               ],
             ),
           ),
@@ -95,13 +101,13 @@ class DiabetesLabsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildCard(BuildContext context, DiabetesLabs item) {
+  Widget _buildCard(BuildContext context, InflammatoryMarkers item) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 6))],
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 6))],
       ),
       child: Row(
         children: [
@@ -109,14 +115,14 @@ class DiabetesLabsSection extends StatelessWidget {
             width: 6,
             height: 140,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(14), bottomLeft: Radius.circular(14)),
+              gradient: const LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+              borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)),
             ),
           ),
           const SizedBox(width: 12),
           const Padding(
             padding: EdgeInsets.only(left: 6, right: 6),
-            child: CircleAvatar(radius: 22, backgroundColor: Color(0xFFEEF2FF), child: Icon(Icons.monitor_heart, color: Color(0xFF3B82F6))),
+            child: CircleAvatar(radius: 20, backgroundColor: Color(0xFFEFFDF6), child: Icon(Icons.thermostat, color: Color(0xFF10B981))),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -125,22 +131,15 @@ class DiabetesLabsSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _formatDate(item.date),
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                  ),
+                  Text(_formatDate(item.date), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     runSpacing: 6,
                     children: [
-                      _infoChip('FBG', item.fbiGlu?.toString()),
-                      _infoChip('2h PP', item.hrsPpBiGlu?.toString()),
-                      _infoChip('HbA1c', item.hba1c?.toString()),
-                      _infoChip('C-Peptide', item.cPeptide?.toString()),
-                      _infoChip('Insulin', item.insulinLevel?.toString()),
-                      _infoChip('RBS', item.rbs?.toString()),
-                      _infoChip('HOMA-IR', item.homaIr?.toString()),
+                      _infoChip('CRP', item.crp?.toString()),
+                      _infoChip('ESR', item.esr?.toString()),
+                      _infoChip('ASOT', item.asot?.toString()),
                     ],
                   ),
                 ],
@@ -149,7 +148,7 @@ class DiabetesLabsSection extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(onPressed: () => context.read<DiabetesLabsCubit>().delete(item.id!), icon: const Icon(Icons.delete_outline, color: Colors.grey)),
+            child: IconButton(onPressed: () => context.read<InflammatoryMarkersCubit>().delete(item.id!), icon: const Icon(Icons.delete_outline, color: Colors.grey)),
           ),
         ],
       ),
@@ -167,40 +166,34 @@ class DiabetesLabsSection extends StatelessWidget {
   void _showAddDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (dialogContext) => BlocProvider.value(value: context.read<DiabetesLabsCubit>(), child: AddDiabetesDialog(patientId: patient.id!)),
+      builder: (dialogContext) => BlocProvider.value(value: context.read<InflammatoryMarkersCubit>(), child: AddInflammatoryMarkersDialog(patientId: patient.id!)),
     );
   }
 
   Widget _infoChip(String label, String? value) {
     return Chip(
       backgroundColor: Colors.grey.shade100,
-      label: Text(
-        '$label: ${value ?? '-'}',
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-      ),
+      label: Text('$label: ${value ?? '-'}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
     );
   }
 }
 
-class AddDiabetesDialog extends StatefulWidget {
+class AddInflammatoryMarkersDialog extends StatefulWidget {
   final int patientId;
-  const AddDiabetesDialog({Key? key, required this.patientId}) : super(key: key);
+  const AddInflammatoryMarkersDialog({Key? key, required this.patientId}) : super(key: key);
 
   @override
-  State<AddDiabetesDialog> createState() => _AddDiabetesDialogState();
+  State<AddInflammatoryMarkersDialog> createState() => _AddInflammatoryMarkersDialogState();
 }
 
-class _AddDiabetesDialogState extends State<AddDiabetesDialog> {
+class _AddInflammatoryMarkersDialogState extends State<AddInflammatoryMarkersDialog> {
   final _formKey = GlobalKey<FormState>();
   DateTime? _date;
-  final fbgCtrl = TextEditingController();
-  final ppCtrl = TextEditingController();
-  final hba1cCtrl = TextEditingController();
-  final cPeptideCtrl = TextEditingController();
-  final insulinCtrl = TextEditingController();
-  final rbsCtrl = TextEditingController();
-  final homaCtrl = TextEditingController();
+
+  final esrCtrl = TextEditingController();
+  final crpCtrl = TextEditingController();
+  final asotCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -210,63 +203,36 @@ class _AddDiabetesDialogState extends State<AddDiabetesDialog> {
 
   @override
   void dispose() {
-    fbgCtrl.dispose();
-    ppCtrl.dispose();
-    hba1cCtrl.dispose();
-    cPeptideCtrl.dispose();
-    insulinCtrl.dispose();
-    rbsCtrl.dispose();
-    homaCtrl.dispose();
+    esrCtrl.dispose();
+    crpCtrl.dispose();
+    asotCtrl.dispose();
     super.dispose();
+  }
+
+  void _submit() async {
+    if (!_formKey.currentState!.validate() || _date == null) return;
+
+    final item = InflammatoryMarkers(
+      patientId: widget.patientId,
+      date: _date!.toIso8601String(),
+      esr: esrCtrl.text.trim().isEmpty ? null : double.tryParse(esrCtrl.text.trim()),
+      crp: crpCtrl.text.trim().isEmpty ? null : double.tryParse(crpCtrl.text.trim()),
+      asot: asotCtrl.text.trim().isEmpty ? null : double.tryParse(asotCtrl.text.trim()),
+      createdAt: DateTime.now().toIso8601String(),
+    );
+
+    try {
+      await context.read<InflammatoryMarkersCubit>().add(item);
+      Navigator.of(context).pop();
+    } catch (e) {
+      // optionally show error
+    }
   }
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(context: context, initialDate: now, firstDate: DateTime(2000), lastDate: now);
     if (picked != null) setState(() => _date = picked);
-  }
-
-  void _submit() async {
-    if (!_formKey.currentState!.validate() || _date == null) return;
-
-    // Debug: raw inputs
-    print('Diabetes input raw: fbg="${fbgCtrl.text}", pp="${ppCtrl.text}", hba1c="${hba1cCtrl.text}", cPeptide="${cPeptideCtrl.text}", insulin="${insulinCtrl.text}", rbs="${rbsCtrl.text}", homa="${homaCtrl.text}"');
-
-    String norm(String s) => s.trim().replaceAll(',', '.');
-
-    double? parseNum(TextEditingController c) {
-      final t = norm(c.text);
-      if (t.isEmpty) return null;
-      final p = double.tryParse(t);
-      if (p == null) print('Diabetes parsing failed for "${c.text}" -> "$t"');
-      return p;
-    }
-
-    final item = DiabetesLabs(
-      patientId: widget.patientId,
-      date: _date!.toIso8601String(),
-      fbiGlu: parseNum(fbgCtrl),
-      hrsPpBiGlu: parseNum(ppCtrl),
-      hba1c: parseNum(hba1cCtrl),
-      cPeptide: parseNum(cPeptideCtrl),
-      insulinLevel: parseNum(insulinCtrl),
-      rbs: parseNum(rbsCtrl),
-      homaIr: parseNum(homaCtrl),
-      createdAt: DateTime.now().toIso8601String(),
-    );
-
-    // Log the map that will be inserted
-    try {
-      // If model provides toMap()
-      try {
-        print('Diabetes to insert: ${item.toMap()}');
-      } catch (_) {}
-
-      await context.read<DiabetesLabsCubit>().add(item);
-      Navigator.of(context).pop();
-    } catch (e) {
-      print('Error adding diabetes labs: $e');
-    }
   }
 
   @override
@@ -277,7 +243,7 @@ class _AddDiabetesDialogState extends State<AddDiabetesDialog> {
       child: SingleChildScrollView(
         child: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+            gradient: LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)], begin: Alignment.topLeft, end: Alignment.bottomRight),
             borderRadius: BorderRadius.all(Radius.circular(14)),
           ),
           child: Column(
@@ -287,7 +253,7 @@ class _AddDiabetesDialogState extends State<AddDiabetesDialog> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 child: Row(
                   children: [
-                    const Text('Add Diabetes Labs', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text('Add Inflammatory Markers', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                     const Spacer(),
                     IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: () => Navigator.of(context).pop()),
                   ],
@@ -309,19 +275,15 @@ class _AddDiabetesDialogState extends State<AddDiabetesDialog> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _CustomTextField(controller: fbgCtrl, label: 'FBG'),
-                      _CustomTextField(controller: ppCtrl, label: '2h PP Glu'),
-                      _CustomTextField(controller: hba1cCtrl, label: 'HbA1c'),
-                      _CustomTextField(controller: cPeptideCtrl, label: 'C-Peptide'),
-                      _CustomTextField(controller: insulinCtrl, label: 'Insulin'),
-                      _CustomTextField(controller: rbsCtrl, label: 'RBS'),
-                      _CustomTextField(controller: homaCtrl, label: 'HOMA-IR'),
+                      _NumberField(controller: esrCtrl, label: 'ESR'),
+                      _NumberField(controller: crpCtrl, label: 'CRP'),
+                      _NumberField(controller: asotCtrl, label: 'ASOT'),
                       const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
                         child: Container(
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                            gradient: const LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)], begin: Alignment.centerLeft, end: Alignment.centerRight),
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 8, offset: const Offset(0, 4))],
                           ),
@@ -335,7 +297,7 @@ class _AddDiabetesDialogState extends State<AddDiabetesDialog> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [Icon(Icons.check, color: Colors.white, size: 20), SizedBox(width: 10), Text('Add Diabetes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16))],
+                                  children: const [Icon(Icons.check, color: Colors.white, size: 20), SizedBox(width: 10), Text('Add', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16))],
                                 ),
                               ),
                             ),
@@ -354,15 +316,15 @@ class _AddDiabetesDialogState extends State<AddDiabetesDialog> {
   }
 }
 
-class _CustomTextField extends StatelessWidget {
+class _NumberField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
-  const _CustomTextField({Key? key, required this.controller, this.label = ''}) : super(key: key);
+  const _NumberField({Key? key, required this.controller, required this.label}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
         controller: controller,
         keyboardType: TextInputType.numberWithOptions(decimal: true),
@@ -371,16 +333,8 @@ class _CustomTextField extends StatelessWidget {
           filled: true,
           fillColor: Colors.grey.shade50,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         ),
-        validator: (v) {
-          // If empty -> OK (fields optional)
-          if (v == null || v.trim().isEmpty) return null;
-          // Normalize comma decimals and validate numeric
-          final t = v.trim().replaceAll(',', '.');
-          if (double.tryParse(t) == null) return 'Enter a valid number';
-          return null;
-        },
       ),
     );
   }

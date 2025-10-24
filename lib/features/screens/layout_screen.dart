@@ -1,6 +1,7 @@
 import 'package:clinic/features/managers/add_user/add_user/patient_cubit.dart';
 import 'package:clinic/features/managers/examination/examination/examination_cubit.dart';
 import 'package:clinic/features/managers/labs/labs_cubit.dart';
+import 'package:clinic/features/managers/labs/virology/virology_cubit.dart';
 import 'package:clinic/features/screens/complaint_screen.dart';
 import 'package:clinic/features/screens/examination_screen.dart';
 import 'package:clinic/features/screens/labs_screen.dart';
@@ -287,7 +288,10 @@ class _LayoutScrrenState extends State<LayoutScrren> {
             create: (BuildContext context) {
               return LabsCubit();
             },
-            child: LabsScreen(patient: patient),
+            child: BlocProvider<VirologyCubit>(
+              create: (_) => VirologyCubit()..loadForPatient(patient!.id!, force: true),
+              child: LabsScreen(patient: patient!),
+            ),
           );
         } catch (e) {
           return Center(child: Text('Error accessing patient selection: $e'));

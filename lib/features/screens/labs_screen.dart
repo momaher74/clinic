@@ -11,6 +11,10 @@ import 'package:clinic/features/managers/labs/thyroid_profile/thyroid_profile_cu
 import 'package:clinic/features/widgets/thyroid_profile_section_widgets.dart';
 import 'package:clinic/features/managers/labs/diabetes_labs/diabetes_labs_cubit.dart';
 import 'package:clinic/features/widgets/diabetes_labs_section_widgets.dart';
+import 'package:clinic/features/managers/labs/lipid_profile/lipid_profile_cubit.dart';
+import 'package:clinic/features/widgets/lipid_profile_section_widgets.dart';
+import 'package:clinic/features/managers/labs/virology/virology_cubit.dart';
+import 'package:clinic/features/widgets/virology_section_widgets.dart';
 
 class LabsScreen extends StatelessWidget {
   final Patient patient;
@@ -22,19 +26,26 @@ class LabsScreen extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => CbcCubit()..loadForPatient(patient.id!),
+          create: (_) => CbcCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => LiverFunctionTestCubit()..loadForPatient(patient.id!),
+          create: (_) => LiverFunctionTestCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => KidneyFunctionTestCubit()..loadForPatient(patient.id!),
+          create: (_) => KidneyFunctionTestCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => DiabetesLabsCubit()..loadForPatient(patient.id!),
+          create: (_) => DiabetesLabsCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => ThyroidProfileCubit()..loadForPatient(patient.id!),
+          create: (_) => LipidProfileCubit()..loadForPatient(patient.id!, force: true),
+        ),
+        BlocProvider(
+          create: (_) => ThyroidProfileCubit()..loadForPatient(patient.id!, force: true),
+        ),
+        // Re-provide the VirologyCubit from parent so the MultiBlocProvider and descendants use the same instance
+        BlocProvider.value(
+          value: context.read<VirologyCubit>(),
         ),
       ],
       child: SingleChildScrollView(
@@ -49,6 +60,10 @@ class LabsScreen extends StatelessWidget {
             KidneyFunctionSection(patient: patient),
             const SizedBox(height: 12),
             DiabetesLabsSection(patient: patient),
+            const SizedBox(height: 12),
+            LipidProfileSection(patient: patient),
+            const SizedBox(height: 12),
+            VirologySection(patient: patient),
             const SizedBox(height: 12),
             ThyroidProfileSection(patient: patient),
             const SizedBox(height: 24),

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:clinic/core/models/diabetes_labs.dart';
 import 'package:clinic/core/services/sql_service.dart';
@@ -25,6 +27,7 @@ class DiabetesLabsCubit extends Cubit<DiabetesLabsState> {
   bool _tableCreated = false;
 
   Future<void> loadForPatient(int patientId, {bool force = false}) async {
+    log('DiabetesLabs: loadForPatient($patientId) force=$force');
     if (_currentPatientId == patientId && _loaded && !force) return;
     _currentPatientId = patientId;
     _loaded = true;
@@ -42,9 +45,17 @@ class DiabetesLabsCubit extends Cubit<DiabetesLabsState> {
         whereArgs: [patientId],
         orderBy: 'created_at DESC',
       );
+      
+      log('Raw diabetes rows: ${maps.length}');
+      log(maps.toString());
+      log(maps.toString());
       final items = maps.map((m) => DiabetesLabs.fromMap(m)).toList();
+      log('Loaded ${items.length} diabetes labs for patient $patientId');
+      log(items.toString());
       emit(state.copyWith(list: items, isLoading: false));
-    } catch (e) {
+    } catch (e, st) {
+      log('Error loading diabetes labs for patient $patientId: $e');
+      log(st.toString());
       emit(state.copyWith(isLoading: false));
     }
   }
@@ -67,8 +78,9 @@ class DiabetesLabsCubit extends Cubit<DiabetesLabsState> {
         createdAt: item.createdAt,
       );
       emit(state.copyWith(list: [updated, ...state.list]));
-    } catch (e) {
-      // handle error
+    } catch (e, st) {
+      log('Error adding diabetes labs: $e');
+      log(st.toString());
     }
   }
 
@@ -77,8 +89,9 @@ class DiabetesLabsCubit extends Cubit<DiabetesLabsState> {
       final db = await _db.database;
       await db.delete('diabetes_labs', where: 'id = ?', whereArgs: [id]);
       emit(state.copyWith(list: state.list.where((c) => c.id != id).toList()));
-    } catch (e) {
-      // handle error
+    } catch (e, st) {
+      log('Error deleting diabetes labs id $id: $e');
+      log(st.toString());
     }
   }
 
