@@ -53,112 +53,121 @@ class LabsScreen extends StatelessWidget {
           create: (_) => CbcCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => LiverFunctionTestCubit()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              LiverFunctionTestCubit()
+                ..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => KidneyFunctionTestCubit()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              KidneyFunctionTestCubit()
+                ..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => DiabetesLabsCubit()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              DiabetesLabsCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => LipidProfileCubit()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              LipidProfileCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => IronProfileCubit()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              IronProfileCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => CuProfileCubit()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              CuProfileCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => ThyroidProfileCubit()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              ThyroidProfileCubit()..loadForPatient(patient.id!, force: true),
         ),
         // Re-provide the VirologyCubit from parent so the MultiBlocProvider and descendants use the same instance
-        BlocProvider.value(
-          value: context.read<VirologyCubit>(),
-        ),
+        BlocProvider.value(value: context.read<VirologyCubit>()),
         // Re-provide the InflammatoryMarkersCubit from parent
-        BlocProvider.value(
-          value: context.read<InflammatoryMarkersCubit>(),
-        ),
+        BlocProvider.value(value: context.read<InflammatoryMarkersCubit>()),
         // Re-provide the PancreaticEnzymesCubit from parent
-        BlocProvider.value(
-          value: context.read<PancreaticEnzymesCubit>(),
-        ),
+        BlocProvider.value(value: context.read<PancreaticEnzymesCubit>()),
         // Re-provide the AutoimmuneMarkersCubit from parent
-        BlocProvider.value(
-          value: context.read<AutoimmuneMarkersCubit>(),
-        ),
+        BlocProvider.value(value: context.read<AutoimmuneMarkersCubit>()),
         // Re-provide the CoagulationProfileCubit from parent
-        BlocProvider.value(
-          value: context.read<CoagulationProfileCubit>(),
-        ),
+        BlocProvider.value(value: context.read<CoagulationProfileCubit>()),
         // Provide CeliacDiseaseLabsCubit for this screen
         BlocProvider(
-          create: (_) => CeliacDiseaseLabsCubit()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              CeliacDiseaseLabsCubit()
+                ..loadForPatient(patient.id!, force: true),
         ),
         // Provide TumorMarkersCubit for this screen
         BlocProvider(
-          create: (_) => TumorMarkersCubit()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              TumorMarkersCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => VitaminLevelCubit()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              VitaminLevelCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => PregnancyTestCubit()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              PregnancyTestCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => StoolTestsCubit()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              StoolTestsCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => UrineAnalysisCubit()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              UrineAnalysisCubit()..loadForPatient(patient.id!, force: true),
         ),
         // Note: AutoimmuneMarkersCubit is provided by the parent (LayoutScreen) so we do not attempt to re-read it here.
       ],
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CbcSection(patient: patient),
-            const SizedBox(height: 12),
-            LiverFunctionSection(patient: patient),
-            const SizedBox(height: 12),
-            KidneyFunctionSection(patient: patient),
-            const SizedBox(height: 12),
-            DiabetesLabsSection(patient: patient),
-            const SizedBox(height: 12),
-            LipidProfileSection(patient: patient),
-            const SizedBox(height: 12),
-            IronProfileSection(patient: patient),
-            const SizedBox(height: 12),
-            CuProfileSection(patient: patient),
-            const SizedBox(height: 12),
-            PancreaticEnzymesSection(patient: patient),
-            const SizedBox(height: 12),
-            VirologySection(patient: patient),
-            const SizedBox(height: 12),
-            InflammatoryMarkersSection(patient: patient),
-            const SizedBox(height: 12),
-            AutoimmuneMarkersSection(patient: patient),
-            const SizedBox(height: 12),
-            CoagulationProfileSection(patient: patient),
-            const SizedBox(height: 12),
-            CeliacDiseaseLabsSection(patient: patient),
-            const SizedBox(height: 12),
-            TumorMarkersSection(patient: patient),
-            const SizedBox(height: 12),
-            VitaminLevelSection(patient: patient),
-            const SizedBox(height: 12),
-            PregnancyTestSection(patient: patient),
-            const SizedBox(height: 12),
-            StoolTestsSection(patient: patient),
-            const SizedBox(height: 12),
-            UrineAnalysisSection(patient: patient),
-            const SizedBox(height: 12),
-            ThyroidProfileSection(patient: patient),
-            const SizedBox(height: 24),
-          ],
+      child: Container(
+        color: Colors.white,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CbcSection(patient: patient),
+              const SizedBox(height: 12),
+              LiverFunctionSection(patient: patient),
+              const SizedBox(height: 12),
+              KidneyFunctionSection(patient: patient),
+              const SizedBox(height: 12),
+              DiabetesLabsSection(patient: patient),
+              const SizedBox(height: 12),
+              LipidProfileSection(patient: patient),
+              const SizedBox(height: 12),
+              IronProfileSection(patient: patient),
+              const SizedBox(height: 12),
+              CuProfileSection(patient: patient),
+              const SizedBox(height: 12),
+              PancreaticEnzymesSection(patient: patient),
+              const SizedBox(height: 12),
+              VirologySection(patient: patient),
+              const SizedBox(height: 12),
+              InflammatoryMarkersSection(patient: patient),
+              const SizedBox(height: 12),
+              AutoimmuneMarkersSection(patient: patient),
+              const SizedBox(height: 12),
+              CoagulationProfileSection(patient: patient),
+              const SizedBox(height: 12),
+              CeliacDiseaseLabsSection(patient: patient),
+              const SizedBox(height: 12),
+              TumorMarkersSection(patient: patient),
+              const SizedBox(height: 12),
+              VitaminLevelSection(patient: patient),
+              const SizedBox(height: 12),
+              PregnancyTestSection(patient: patient),
+              const SizedBox(height: 12),
+              StoolTestsSection(patient: patient),
+              const SizedBox(height: 12),
+              UrineAnalysisSection(patient: patient),
+              const SizedBox(height: 12),
+              ThyroidProfileSection(patient: patient),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );

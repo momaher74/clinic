@@ -3,26 +3,26 @@ import 'package:bloc/bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
-import '../models/imaging_item.dart';
+import '../models/pathology_item.dart';
 
-class ImagingState {
-  final List<ImagingItem> items;
+class PathologyState {
+  final List<PathologyItem> items;
   final bool loading;
 
-  ImagingState({required this.items, this.loading = false});
+  PathologyState({required this.items, this.loading = false});
 
-  ImagingState copyWith({List<ImagingItem>? items, bool? loading}) =>
-      ImagingState(
+  PathologyState copyWith({List<PathologyItem>? items, bool? loading}) =>
+      PathologyState(
         items: items ?? this.items,
         loading: loading ?? this.loading,
       );
 }
 
-class ImagingCubit extends Cubit<ImagingState> {
-  static const _storageKey = 'imaging_items_v1';
+class PathologyCubit extends Cubit<PathologyState> {
+  static const _storageKey = 'pathology_items_v1';
   final SharedPreferences prefs;
 
-  ImagingCubit(this.prefs) : super(ImagingState(items: [])) {
+  PathologyCubit(this.prefs) : super(PathologyState(items: [])) {
     _load();
   }
 
@@ -30,7 +30,7 @@ class ImagingCubit extends Cubit<ImagingState> {
     final raw = prefs.getString(_storageKey);
     if (raw != null) {
       try {
-        final items = ImagingItem.listFromJson(raw);
+        final items = PathologyItem.listFromJson(raw);
         emit(state.copyWith(items: items));
       } catch (_) {}
     }
@@ -38,7 +38,7 @@ class ImagingCubit extends Cubit<ImagingState> {
 
   Future<String> _saveImageFile(File file) async {
     final appDir = await getApplicationDocumentsDirectory();
-    final imagesDir = Directory('${appDir.path}/images');
+    final imagesDir = Directory('${appDir.path}/pathology_images');
     if (!await imagesDir.exists()) await imagesDir.create(recursive: true);
     final id = const Uuid().v4();
     final ext = file.path.split('.').last;
@@ -49,27 +49,30 @@ class ImagingCubit extends Cubit<ImagingState> {
 
   Future<void> addItem({
     required String type,
-    required String doctor,
-    required String where,
+    required String pathLab,
+    required String pathologist,
     required String report,
-    required File imageFile,
+    File? imageFile,
     int? patientId,
   }) async {
     emit(state.copyWith(loading: true));
     try {
-      final savedPath = await _saveImageFile(imageFile);
-      final item = ImagingItem(
+      String savedPath = '';
+      if (imageFile != null) {
+        savedPath = await _saveImageFile(imageFile);
+      }
+      final item = PathologyItem(
         id: const Uuid().v4(),
         type: type,
-        doctor: doctor,
-        where: where,
+        pathLab: pathLab,
+        pathologist: pathologist,
         report: report,
         patientId: patientId,
         imagePath: savedPath,
         createdAt: DateTime.now().millisecondsSinceEpoch,
       );
-      final newItems = List<ImagingItem>.from(state.items)..insert(0, item);
-      prefs.setString(_storageKey, ImagingItem.listToJson(newItems));
+      final newItems = List<PathologyItem>.from(state.items)..insert(0, item);
+      prefs.setString(_storageKey, PathologyItem.listToJson(newItems));
       emit(state.copyWith(items: newItems, loading: false));
     } catch (e) {
       emit(state.copyWith(loading: false));
@@ -78,15 +81,14 @@ class ImagingCubit extends Cubit<ImagingState> {
 
   Future<void> removeItem(String id) async {
     final newItems = state.items.where((e) => e.id != id).toList();
-    prefs.setString(_storageKey, ImagingItem.listToJson(newItems));
-    // delete file if exists
+    prefs.setString(_storageKey, PathologyItem.listToJson(newItems));
     final toDelete = state.items.firstWhere(
       (e) => e.id == id,
-      orElse: () => ImagingItem(
+      orElse: () => PathologyItem(
         id: '',
         type: '',
-        doctor: '',
-        where: '',
+        pathLab: '',
+        pathologist: '',
         report: '',
         imagePath: '',
         createdAt: 0,

@@ -1,3 +1,4 @@
+import 'package:clinic/core/constants/constants.dart';
 import 'package:clinic/features/managers/add_user/add_user/patient_cubit.dart';
 import 'package:clinic/features/managers/examination/examination/examination_cubit.dart';
 import 'package:clinic/features/managers/labs/labs_cubit.dart';
@@ -13,6 +14,8 @@ import 'package:clinic/features/screens/patient_history_screen.dart';
 import 'package:clinic/features/screens/patient_screen.dart';
 import 'package:clinic/features/screens/imaging_screen.dart';
 import 'package:clinic/features/screens/endoscopy_screen.dart';
+import 'package:clinic/features/screens/pathology_screen.dart';
+import 'package:clinic/features/screens/precription_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:clinic/core/models/patient.dart';
@@ -48,15 +51,12 @@ class _LayoutScrrenState extends State<LayoutScrren> {
       // Responsive body: persistent sidebar on wide screens, Drawer on small
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final bool isWide = constraints.maxWidth >= 800;
           return Row(
             children: [
-              if (isWide) ...[
-                _buildSidebar(isWide: true),
-                Expanded(child: _buildContent()),
-              ] else ...[
-                Expanded(child: _buildContent()),
-              ],
+              _buildSidebar(isWide: true),
+              Expanded(
+                child: Container(color: Colors.white, child: _buildContent()),
+              ),
             ],
           );
         },
@@ -76,9 +76,10 @@ class _LayoutScrrenState extends State<LayoutScrren> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: primaryColor,
             blurRadius: 8,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 6),
+            spreadRadius: 5,
           ),
         ],
       ),
@@ -151,18 +152,6 @@ class _LayoutScrrenState extends State<LayoutScrren> {
             );
           }),
           const Spacer(),
-          // bottom actions
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: TextButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.logout, color: Colors.redAccent),
-              label: const Text(
-                'Logout',
-                style: TextStyle(color: Colors.redAccent),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -294,31 +283,73 @@ class _LayoutScrrenState extends State<LayoutScrren> {
             create: (BuildContext context) {
               return LabsCubit();
             },
-            child: Builder(builder: (ctx) {
-              final sel = patient!; // capture non-null patient for provider closures
-              return BlocProvider<VirologyCubit>(
-                create: (_) => VirologyCubit()..loadForPatient(sel.id!, force: true),
-                child: BlocProvider<InflammatoryMarkersCubit>(
-                  create: (_) => InflammatoryMarkersCubit()..loadForPatient(sel.id!, force: true),
-                  child: BlocProvider<PancreaticEnzymesCubit>(
-                    create: (_) => PancreaticEnzymesCubit()..loadForPatient(sel.id!, force: true),
-                    child: BlocProvider<AutoimmuneMarkersCubit>(
-                      create: (_) => AutoimmuneMarkersCubit()..loadForPatient(sel.id!, force: true),
-                      child: BlocProvider<CoagulationProfileCubit>(
-                        create: (_) => CoagulationProfileCubit()..loadForPatient(sel.id!, force: true),
-                        child: LabsScreen(patient: sel),
+            child: Builder(
+              builder: (ctx) {
+                final sel =
+                    patient!; // capture non-null patient for provider closures
+                return BlocProvider<VirologyCubit>(
+                  create: (_) =>
+                      VirologyCubit()..loadForPatient(sel.id!, force: true),
+                  child: BlocProvider<InflammatoryMarkersCubit>(
+                    create: (_) =>
+                        InflammatoryMarkersCubit()
+                          ..loadForPatient(sel.id!, force: true),
+                    child: BlocProvider<PancreaticEnzymesCubit>(
+                      create: (_) =>
+                          PancreaticEnzymesCubit()
+                            ..loadForPatient(sel.id!, force: true),
+                      child: BlocProvider<AutoimmuneMarkersCubit>(
+                        create: (_) =>
+                            AutoimmuneMarkersCubit()
+                              ..loadForPatient(sel.id!, force: true),
+                        child: BlocProvider<CoagulationProfileCubit>(
+                          create: (_) =>
+                              CoagulationProfileCubit()
+                                ..loadForPatient(sel.id!, force: true),
+                          child: LabsScreen(patient: sel),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              },
+            ),
           );
         } catch (e) {
           return Center(child: Text('Error accessing patient selection: $e'));
         }
       case 5:
-        return ImagingScreen();
+        // Safely read selected patient from PatientCubit and show ImagingScreen
+        try {
+          final cubit = context.read<PatientCubit>();
+          final state = cubit.state;
+          if (state.selectedIds.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'No patient selected. Please select a patient from the Patients screen.',
+                ),
+              ),
+            );
+          }
+
+          final selectedId = state.selectedIds.first;
+          Patient? patient;
+          try {
+            patient = state.patients.firstWhere((p) => p.id == selectedId);
+          } catch (_) {
+            patient = null;
+          }
+
+          if (patient == null) {
+            return const Center(child: Text('Selected patient not found.'));
+          }
+
+          return ImagingScreen(patient: patient);
+        } catch (e) {
+          return Center(child: Text('Error accessing patient selection: $e'));
+        }
       case 6:
         // Safely read selected patient from PatientCubit and show EndoscopyScreen
         try {
@@ -351,6 +382,69 @@ class _LayoutScrrenState extends State<LayoutScrren> {
         } catch (e) {
           return Center(child: Text('Error accessing patient selection: $e'));
         }
+      case 7:
+        // Pathology handled earlier
+        try {
+          final cubit = context.read<PatientCubit>();
+          final state = cubit.state;
+          if (state.selectedIds.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'No patient selected. Please select a patient from the Patients screen.',
+                ),
+              ),
+            );
+          }
+
+          final selectedId = state.selectedIds.first;
+          Patient? patient;
+          try {
+            patient = state.patients.firstWhere((p) => p.id == selectedId);
+          } catch (_) {
+            patient = null;
+          }
+
+          if (patient == null)
+            return const Center(child: Text('Selected patient not found.'));
+
+          return PathologyScreen(patient: patient);
+        } catch (e) {
+          return Center(child: Text('Error accessing patient selection: $e'));
+        }
+      case 8:
+        // Safely read selected patient and show PrecriptionScreen
+        try {
+          final cubit = context.read<PatientCubit>();
+          final state = cubit.state;
+          if (state.selectedIds.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'No patient selected. Please select a patient from the Patients screen.',
+                ),
+              ),
+            );
+          }
+
+          final selectedId = state.selectedIds.first;
+          Patient? patient;
+          try {
+            patient = state.patients.firstWhere((p) => p.id == selectedId);
+          } catch (_) {
+            patient = null;
+          }
+
+          if (patient == null)
+            return const Center(child: Text('Selected patient not found.'));
+
+          return PrecriptionScreen(patient: patient);
+        } catch (e) {
+          return Center(child: Text('Error accessing patient selection: $e'));
+        }
+
       default:
         return Center(
           child: Text(

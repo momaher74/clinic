@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:clinic/core/constants/constants.dart';
 import 'package:flutter/material.dart';
@@ -7,47 +6,34 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../core/manager/imaging_cubit.dart';
-import '../../core/models/imaging_item.dart';
+import '../../core/manager/prescription_cubit.dart';
+import '../../core/models/prescription_item.dart';
 import '../../core/models/patient.dart';
 
-class ImagingScreen extends StatefulWidget {
+class PrecriptionScreen extends StatefulWidget {
   final Patient? patient;
 
-  const ImagingScreen({super.key, this.patient});
+  const PrecriptionScreen({super.key, this.patient});
 
   @override
-  State<ImagingScreen> createState() => _ImagingScreenState();
+  State<PrecriptionScreen> createState() => _PrecriptionScreenState();
 }
 
-class _ImagingScreenState extends State<ImagingScreen> {
-  ImagingCubit? cubit;
-  final _typeController = TextEditingController();
-  final _doctorController = TextEditingController();
-  final _whereController = TextEditingController();
-  final _reportController = TextEditingController();
+class _PrecriptionScreenState extends State<PrecriptionScreen> {
+  PrescriptionCubit? cubit;
 
   @override
   void initState() {
     super.initState();
     SharedPreferences.getInstance().then((prefs) {
-      cubit = ImagingCubit(prefs);
+      cubit = PrescriptionCubit(prefs);
       setState(() {});
     });
   }
 
   @override
-  void dispose() {
-    _typeController.dispose();
-    _doctorController.dispose();
-    _whereController.dispose();
-    _reportController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (!mounted || (cubit == null)) {
+    if (!mounted || cubit == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return BlocProvider.value(
@@ -57,29 +43,26 @@ class _ImagingScreenState extends State<ImagingScreen> {
         child: Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            title: const Text('Imaging'),
+            title: const Text('Prescription'),
             centerTitle: true,
             elevation: 0,
             backgroundColor: Colors.transparent,
             foregroundColor: Colors.black87,
           ),
-          body: BlocBuilder<ImagingCubit, ImagingState>(
+          body: BlocBuilder<PrescriptionCubit, PrescriptionState>(
             builder: (context, state) {
-              // filter items for selected patient (if any)
               final selectedPatientId = widget.patient?.id;
               final visibleItems = selectedPatientId == null
                   ? state.items
                   : state.items
                         .where((i) => i.patientId == selectedPatientId)
                         .toList();
+
               return Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Modern header
-
-                    // Contents
                     Expanded(
                       child: visibleItems.isEmpty
                           ? Center(
@@ -87,13 +70,13 @@ class _ImagingScreenState extends State<ImagingScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    Icons.photo_album_outlined,
+                                    Icons.medication_outlined,
                                     size: 72,
                                     color: Colors.grey.shade300,
                                   ),
                                   const SizedBox(height: 12),
                                   const Text(
-                                    'No imaging items yet',
+                                    'No prescriptions yet',
                                     style: TextStyle(color: Colors.grey),
                                   ),
                                 ],
@@ -106,7 +89,7 @@ class _ImagingScreenState extends State<ImagingScreen> {
                                   const SizedBox(height: 12),
                               itemBuilder: (context, index) {
                                 final item = visibleItems[index];
-                                return _ImagingCard(
+                                return _PrescriptionCard(
                                   item: item,
                                   onDelete: () => cubit!.removeItem(item.id),
                                   onPreview: (path, title) =>
@@ -152,10 +135,14 @@ class _ImagingScreenState extends State<ImagingScreen> {
 
   Future<void> _openAddDialog() async {
     if (cubit == null) return;
-    final typeCtl = TextEditingController();
-    final doctorCtl = TextEditingController();
-    final whereCtl = TextEditingController();
-    final reportCtl = TextEditingController();
+    final dateCtl = TextEditingController();
+    // default the date field to today's date (YYYY-MM-DD)
+    final _now = DateTime.now();
+    dateCtl.text = _now.toIso8601String().split('T').first;
+    final drugCtl = TextEditingController();
+    final doseCtl = TextEditingController();
+    final freqCtl = TextEditingController();
+    final daysCtl = TextEditingController();
     String? pickedPath;
 
     await showDialog<void>(
@@ -163,13 +150,7 @@ class _ImagingScreenState extends State<ImagingScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            if (pickedPath != null) {
-              /* pickedPath used below for preview */
-            }
-
-            final isSaveEnabled =
-                (typeCtl.text.trim().isNotEmpty && pickedPath != null);
-
+            final isSaveEnabled = drugCtl.text.trim().isNotEmpty;
             return Dialog(
               insetPadding: const EdgeInsets.symmetric(
                 horizontal: 40,
@@ -183,7 +164,6 @@ class _ImagingScreenState extends State<ImagingScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Header (white background)
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
@@ -201,7 +181,7 @@ class _ImagingScreenState extends State<ImagingScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              'Add Imaging',
+                              'Add Prescription',
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontSize: 18,
@@ -220,18 +200,52 @@ class _ImagingScreenState extends State<ImagingScreen> {
                       ),
                     ),
 
-                    // Content
                     Padding(
                       padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Type
                           TextField(
-                            controller: typeCtl,
+                            controller: dateCtl,
                             onChanged: (_) => setState(() {}),
                             decoration: InputDecoration(
-                              labelText: 'Type',
+                              labelText: 'Date',
+                              filled: true,
+                              fillColor: Colors.grey.shade50,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 14,
+                              ),
+                            ),
+                            onTap: () async {
+                              // show date picker
+                              FocusScope.of(context).requestFocus(FocusNode());
+                              final now = DateTime.now();
+                              final picked = await showDatePicker(
+                                context: context,
+                                initialDate: now,
+                                firstDate: DateTime(now.year - 10),
+                                lastDate: DateTime(now.year + 10),
+                              );
+                              if (picked != null)
+                                dateCtl.text = picked
+                                    .toIso8601String()
+                                    .split('T')
+                                    .first;
+                              setState(() {});
+                            },
+                          ),
+                          const SizedBox(height: 12),
+
+                          TextField(
+                            controller: drugCtl,
+                            onChanged: (_) => setState(() {}),
+                            decoration: InputDecoration(
+                              labelText: 'Drug',
                               filled: true,
                               fillColor: Colors.grey.shade50,
                               border: OutlineInputBorder(
@@ -246,12 +260,56 @@ class _ImagingScreenState extends State<ImagingScreen> {
                           ),
                           const SizedBox(height: 12),
 
-                          // Doctor
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: doseCtl,
+                                  onChanged: (_) => setState(() {}),
+                                  decoration: InputDecoration(
+                                    labelText: 'Dose',
+                                    filled: true,
+                                    fillColor: Colors.grey.shade50,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: TextField(
+                                  controller: freqCtl,
+                                  onChanged: (_) => setState(() {}),
+                                  decoration: InputDecoration(
+                                    labelText: 'Frequency',
+                                    filled: true,
+                                    fillColor: Colors.grey.shade50,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+
                           TextField(
-                            controller: doctorCtl,
+                            controller: daysCtl,
                             onChanged: (_) => setState(() {}),
                             decoration: InputDecoration(
-                              labelText: 'Doctor',
+                              labelText: 'Days',
                               filled: true,
                               fillColor: Colors.grey.shade50,
                               border: OutlineInputBorder(
@@ -264,51 +322,9 @@ class _ImagingScreenState extends State<ImagingScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
-
-                          // Where
-                          TextField(
-                            controller: whereCtl,
-                            onChanged: (_) => setState(() {}),
-                            decoration: InputDecoration(
-                              labelText: 'Where',
-                              filled: true,
-                              fillColor: Colors.grey.shade50,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 14,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Report
-                          TextField(
-                            controller: reportCtl,
-                            onChanged: (_) => setState(() {}),
-                            decoration: InputDecoration(
-                              labelText: 'Report',
-                              filled: true,
-                              fillColor: Colors.grey.shade50,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 14,
-                              ),
-                            ),
-                            maxLines: 4,
-                          ),
 
                           const SizedBox(height: 12),
 
-                          // File picker + preview
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -330,23 +346,20 @@ class _ImagingScreenState extends State<ImagingScreen> {
                                     if (result != null &&
                                         result.files.isNotEmpty) {
                                       final path = result.files.single.path;
-                                      if (path != null) {
+                                      if (path != null)
                                         setState(() => pickedPath = path);
-                                      } else {
-                                        final msg =
-                                            'Selected file has no path.';
-                                        print(
-                                          'FilePicker: $msg result=$result',
-                                        );
+                                      else
                                         ScaffoldMessenger.of(
                                           context,
                                         ).showSnackBar(
-                                          SnackBar(content: Text(msg)),
+                                          const SnackBar(
+                                            content: Text(
+                                              'Selected file has no path.',
+                                            ),
+                                          ),
                                         );
-                                      }
                                     }
-                                  } catch (e, st) {
-                                    print('FilePicker error: $e\n$st');
+                                  } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
@@ -369,7 +382,6 @@ class _ImagingScreenState extends State<ImagingScreen> {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              // preview box
                               if (pickedPath != null)
                                 Expanded(
                                   child: ClipRRect(
@@ -391,7 +403,7 @@ class _ImagingScreenState extends State<ImagingScreen> {
                                     ),
                                     alignment: Alignment.center,
                                     child: const Text(
-                                      'No file selected',
+                                      'No file selected (optional)',
                                       style: TextStyle(color: Colors.grey),
                                     ),
                                   ),
@@ -402,7 +414,6 @@ class _ImagingScreenState extends State<ImagingScreen> {
                       ),
                     ),
 
-                    // Actions
                     Padding(
                       padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
                       child: Row(
@@ -412,17 +423,19 @@ class _ImagingScreenState extends State<ImagingScreen> {
                             child: const Text('Cancel'),
                           ),
                           const Spacer(),
-                          // Gradient Save button
                           ElevatedButton(
                             onPressed: isSaveEnabled
                                 ? () async {
-                                    final file = File(pickedPath!);
+                                    final f = pickedPath != null
+                                        ? File(pickedPath!)
+                                        : null;
                                     await cubit!.addItem(
-                                      type: typeCtl.text.trim(),
-                                      doctor: doctorCtl.text.trim(),
-                                      where: whereCtl.text.trim(),
-                                      report: reportCtl.text.trim(),
-                                      imageFile: file,
+                                      date: dateCtl.text.trim(),
+                                      drug: drugCtl.text.trim(),
+                                      dose: doseCtl.text.trim(),
+                                      frequency: freqCtl.text.trim(),
+                                      days: daysCtl.text.trim(),
+                                      imageFile: f,
                                       patientId: widget.patient?.id,
                                     );
                                     Navigator.of(context).pop();
@@ -455,9 +468,7 @@ class _ImagingScreenState extends State<ImagingScreen> {
     );
   }
 
-  // Fullscreen image preview dialog
   Future<void> _showImagePreview(String imagePath, String title) async {
-    // show a polished preview dialog with zoom/pan support
     await showDialog<void>(
       context: context,
       barrierDismissible: true,
@@ -465,7 +476,6 @@ class _ImagingScreenState extends State<ImagingScreen> {
         final mq = MediaQuery.of(context).size;
         final maxWidth = mq.width * 0.8;
         final maxHeight = mq.height * 0.8;
-
         return Dialog(
           insetPadding: const EdgeInsets.all(20),
           backgroundColor: Colors.white,
@@ -482,7 +492,6 @@ class _ImagingScreenState extends State<ImagingScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Header
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
@@ -502,8 +511,6 @@ class _ImagingScreenState extends State<ImagingScreen> {
                         ],
                       ),
                     ),
-
-                    // Image area
                     Expanded(
                       child: Container(
                         color: Colors.white,
@@ -532,12 +539,12 @@ class _ImagingScreenState extends State<ImagingScreen> {
   }
 }
 
-class _ImagingCard extends StatelessWidget {
-  final ImagingItem item;
+class _PrescriptionCard extends StatelessWidget {
+  final PrescriptionItem item;
   final VoidCallback onDelete;
   final void Function(String imagePath, String title)? onPreview;
 
-  const _ImagingCard({
+  const _PrescriptionCard({
     required this.item,
     required this.onDelete,
     this.onPreview,
@@ -545,7 +552,10 @@ class _ImagingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onPreview?.call(item.imagePath, item.type),
+      onTap: () {
+        if (item.imagePath.isNotEmpty)
+          onPreview?.call(item.imagePath, item.drug);
+      },
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
@@ -558,194 +568,124 @@ class _ImagingCard extends StatelessWidget {
             ),
           ],
         ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final maxH =
-                constraints.maxHeight.isFinite && constraints.maxHeight > 0
-                ? constraints.maxHeight
-                : 180.0;
-            final maxW =
-                constraints.maxWidth.isFinite && constraints.maxWidth > 0
-                ? constraints.maxWidth
-                : 360.0;
-            final imageWidth = min(140.0, maxW * 0.36);
-
-            return Row(
-              children: [
-                // image preview area with overlay, height matches available height
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    bottomLeft: Radius.circular(12),
-                  ),
-                  child: SizedBox(
-                    width: imageWidth,
-                    height: maxH,
-                    child: Stack(
-                      fit: StackFit.expand,
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                bottomLeft: Radius.circular(12),
+              ),
+              child: SizedBox(
+                width: 120,
+                height: 120,
+                child:
+                    item.imagePath.isNotEmpty &&
+                        File(item.imagePath).existsSync()
+                    ? Image.file(File(item.imagePath), fit: BoxFit.cover)
+                    : Container(
+                        color: Colors.grey.shade100,
+                        child: const Icon(
+                          Icons.image_not_supported,
+                          size: 40,
+                          color: Colors.grey,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 6,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (item.imagePath.isNotEmpty &&
-                            File(item.imagePath).existsSync())
-                          Image.file(File(item.imagePath), fit: BoxFit.cover)
-                        else
-                          Container(
-                            color: Colors.grey.shade100,
-                            child: const Icon(
-                              Icons.image_not_supported,
-                              size: 40,
-                              color: Colors.grey,
+                        Expanded(
+                          child: Text(
+                            item.drug,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        Positioned.fill(
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () =>
-                                  onPreview?.call(item.imagePath, item.type),
-                              child: Container(
-                                alignment: Alignment.center,
-                                color: Colors.black.withOpacity(0.04),
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.8),
-                                    shape: BoxShape.circle,
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          height: 36,
+                          width: 36,
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: () async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (c) => AlertDialog(
+                                  title: const Text('Delete'),
+                                  content: const Text(
+                                    'Delete this prescription?',
                                   ),
-                                  child: const Icon(
-                                    Icons.open_in_full,
-                                    color: Colors.black54,
-                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(c).pop(false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(c).pop(true),
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
                                 ),
-                              ),
+                              );
+                              if (confirm == true) onDelete();
+                            },
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.redAccent,
+                              size: 18,
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // details column that adapts to available height
-                Expanded(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: maxH,
-                      maxHeight: maxH,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 6,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  item.type,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                height: 36,
-                                width: 36,
-                                decoration: BoxDecoration(
-                                  color: Colors.red.shade50,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: IconButton(
-                                  padding: EdgeInsets.zero,
-                                  onPressed: () async {
-                                    final confirm = await showDialog<bool>(
-                                      context: context,
-                                      builder: (c) => AlertDialog(
-                                        title: const Text('Delete'),
-                                        content: const Text(
-                                          'Delete this imaging item?',
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(c).pop(false),
-                                            child: const Text('Cancel'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(c).pop(true),
-                                            child: const Text('Delete'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                    if (confirm == true) onDelete();
-                                  },
-                                  icon: const Icon(
-                                    Icons.delete_outline,
-                                    color: Colors.redAccent,
-                                    size: 18,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
 
-                          // metadata and report (flexible so it can shrink on small tiles)
-                          Flexible(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (item.doctor.isNotEmpty)
-                                  Text(
-                                    'Doctor: ${item.doctor}',
-                                    style: const TextStyle(fontSize: 14),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                if (item.where.isNotEmpty)
-                                  Text(
-                                    'Where: ${item.where}',
-                                    style: const TextStyle(fontSize: 14),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                const SizedBox(height: 6),
-                                if (item.report.isNotEmpty)
-                                  Text(
-                                    item.report,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                              ],
-                            ),
-                          ),
-
-                          // added timestamp at bottom
-                          Text(
-                            'Added: ${DateTime.fromMillisecondsSinceEpoch(item.createdAt)}',
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 6),
+                    if (item.dose.isNotEmpty)
+                      Text(
+                        'Dose: ${item.dose}',
+                        style: const TextStyle(fontSize: 14),
                       ),
+                    if (item.frequency.isNotEmpty)
+                      Text(
+                        'Frequency: ${item.frequency}',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    if (item.days.isNotEmpty)
+                      Text(
+                        'Days: ${item.days}',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+
+                    Text(
+                      'Date: ${item.date}',
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            );
-          },
+              ),
+            ),
+          ],
         ),
       ),
     );

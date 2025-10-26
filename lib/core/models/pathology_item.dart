@@ -1,20 +1,20 @@
 import 'dart:convert';
 
-class ImagingItem {
+class PathologyItem {
   final String id;
   final String type;
-  final String doctor;
-  final String where;
+  final String pathLab;
+  final String pathologist;
   final String report;
   final int? patientId;
   final String imagePath;
   final int createdAt;
 
-  ImagingItem({
+  PathologyItem({
     required this.id,
     required this.type,
-    required this.doctor,
-    required this.where,
+    required this.pathLab,
+    required this.pathologist,
     required this.report,
     this.patientId,
     required this.imagePath,
@@ -24,36 +24,36 @@ class ImagingItem {
   Map<String, dynamic> toJson() => {
     'id': id,
     'type': type,
-    'doctor': doctor,
-    'where': where,
+    'pathLab': pathLab,
+    'pathologist': pathologist,
     'report': report,
     'patientId': patientId,
     'imagePath': imagePath,
     'createdAt': createdAt,
   };
 
-  factory ImagingItem.fromJson(Map<String, dynamic> json) => ImagingItem(
+  factory PathologyItem.fromJson(Map<String, dynamic> json) => PathologyItem(
     id: json['id'] as String,
     type: json['type'] as String,
-    doctor: (json['doctor'] as String?) ?? '',
-    where: (json['where'] as String?) ?? '',
+    pathLab: (json['pathLab'] as String?) ?? '',
+    pathologist: (json['pathologist'] as String?) ?? '',
     report: (json['report'] as String?) ?? '',
     patientId: json['patientId'] is int
         ? (json['patientId'] as int)
         : (json['patientId'] is String
               ? int.tryParse(json['patientId'] as String)
               : null),
-    imagePath: json['imagePath'] as String,
+    imagePath: (json['imagePath'] as String?) ?? '',
     createdAt: (json['createdAt'] as num).toInt(),
   );
 
-  static List<ImagingItem> listFromJson(String jsonStr) {
+  static List<PathologyItem> listFromJson(String jsonStr) {
     final decoded = json.decode(jsonStr) as List<dynamic>;
     return decoded
-        .map((e) => ImagingItem.fromJson(e as Map<String, dynamic>))
+        .map((e) => PathologyItem.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 
-  static String listToJson(List<ImagingItem> items) =>
+  static String listToJson(List<PathologyItem> items) =>
       json.encode(items.map((e) => e.toJson()).toList());
 }
