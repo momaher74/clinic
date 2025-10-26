@@ -40,7 +40,7 @@ dependencies:
   path_provider: 
   flutter_bloc: 
   sidebar_with_animation: ^0.0.3
-  toastification: ^3.0.3
+  # toastification: ^3.0.3
   shared_preferences: ^2.2.3
   uuid: 
   file_picker: 

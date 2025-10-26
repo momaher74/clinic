@@ -24,7 +24,8 @@ class EndoscopyScreen extends StatelessWidget {
           create: (_) => OgdCubit()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
-          create: (_) => ColonoscopyC()..loadForPatient(patient.id!, force: true),
+          create: (_) =>
+              ColonoscopyC()..loadForPatient(patient.id!, force: true),
         ),
         BlocProvider(
           create: (_) => ErcpCubit()..loadForPatient(patient.id!, force: true),
@@ -33,28 +34,35 @@ class EndoscopyScreen extends StatelessWidget {
           create: (_) => EusCubit()..loadForPatient(patient.id!, force: true),
         ),
       ],
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            // ensure the column fills at least the viewport height so its children stay at the top
-            minHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - kToolbarHeight,
-          ),
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                OgdSection(patient: patient),
-                 sharedDivider(),
-                ColonoscopySection(patient: patient),
-                sharedDivider(),
-                ErcpSection(patient: patient),
-                sharedDivider(),
-                EusSection(patient: patient),
-                sharedDivider(),
-              ],
+      child: Container(
+        height: double.infinity,
+        color: Colors.white,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              // ensure the column fills at least the viewport height so its children stay at the top
+              minHeight:
+                  MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  kToolbarHeight,
+            ),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  OgdSection(patient: patient),
+                  sharedDivider(),
+                  ColonoscopySection(patient: patient),
+                  sharedDivider(),
+                  ErcpSection(patient: patient),
+                  sharedDivider(),
+                  EusSection(patient: patient),
+                  sharedDivider(),
+                ],
+              ),
             ),
           ),
         ),

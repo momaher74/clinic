@@ -8,38 +8,46 @@ var defaultGradient = LinearGradient(
 
 Color primaryColor = Color(0xFF3B82F6);
 
-  String shortDate(String iso) {
-    try {
-      final dt = DateTime.parse(iso).toLocal();
-      return '${dt.day}/${dt.month}/${dt.year}';
-    } catch (_) {
-      return iso;
-    }
+String shortDate(String iso) {
+  try {
+    final dt = DateTime.parse(iso).toLocal();
+    return '${dt.day}/${dt.month}/${dt.year}';
+  } catch (_) {
+    return iso;
   }
+}
 
+Widget infoTile(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          value.isEmpty ? '-' : value,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ],
+    ),
+  );
+}
 
-  Widget infoTile(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: TextStyle(color: Colors.grey.shade700, fontSize: 12)),
-          const SizedBox(height: 6),
-          Text(value.isEmpty ? '-' : value, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
-
-
-
-
-Widget sharedDivider(){
-
+Widget sharedDivider() {
   return Container(
     margin: const EdgeInsets.symmetric(vertical: 12),
-    height: 2,  width: double.infinity , decoration: BoxDecoration(
-      color: Colors.grey
-  ),) ; 
+    height: 2,
+    width: double.infinity,
+    decoration: BoxDecoration(color: Colors.grey),
+  );
 }
+
+TextStyle whiteStyle = const TextStyle(
+  color: Colors.white,
+  fontSize: 16,
+  fontWeight: FontWeight.w500,
+);
