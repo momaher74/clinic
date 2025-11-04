@@ -12,7 +12,7 @@ void main() async {
   // Maximize/resize desktop window on app start
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     try {
-      setWindowTitle('clinic');
+      setWindowTitle("Dr Saad Elbelasy Clinic's");
       // ensure minimum width 900; use primary screen visible height as min height so height cannot be reduced below visible area
       final info = await getWindowInfo();
       final frame = info.screen?.visibleFrame;
@@ -48,11 +48,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) =>PatientCubit()),
-      ],
+      providers: [BlocProvider(create: (_) => PatientCubit())],
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: "Dr Saad Elbelasy Clinic's",
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),

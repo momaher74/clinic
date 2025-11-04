@@ -67,6 +67,13 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # App assets
+  # If you add an app logo, place it under assets/images and add it here.
+  # The clinic logo entry was removed to avoid build errors when the file is missing.
+  # Example to add later:
+  # assets:
+  #   - assets/images/clinic_logo.png
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

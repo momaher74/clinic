@@ -22,8 +22,9 @@ class InflammatoryMarkersSection extends StatelessWidget {
 
     return BlocBuilder<InflammatoryMarkersCubit, InflammatoryMarkersState>(
       builder: (context, state) {
-        if (state.isLoading)
+        if (state.isLoading) {
           return const Center(child: CircularProgressIndicator());
+        }
 
         if (state.list.isEmpty) {
           return Padding(
@@ -221,8 +222,9 @@ class InflammatoryMarkersSection extends StatelessWidget {
   String _formatDate(String raw) {
     try {
       final parsed = DateTime.tryParse(raw);
-      if (parsed != null)
+      if (parsed != null) {
         return '${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}';
+      }
     } catch (_) {}
     return raw.contains('T') ? raw.split('T').first : raw;
   }
@@ -251,8 +253,7 @@ class InflammatoryMarkersSection extends StatelessWidget {
 
 class AddInflammatoryMarkersDialog extends StatefulWidget {
   final int patientId;
-  const AddInflammatoryMarkersDialog({Key? key, required this.patientId})
-    : super(key: key);
+  const AddInflammatoryMarkersDialog({super.key, required this.patientId});
 
   @override
   State<AddInflammatoryMarkersDialog> createState() =>
