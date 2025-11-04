@@ -18,7 +18,8 @@ class VirologySection extends StatelessWidget {
 
     return BlocBuilder<VirologyCubit, VirologyState>(
       builder: (context, state) {
-        if (state.isLoading) return const Center(child: CircularProgressIndicator());
+        if (state.isLoading)
+          return const Center(child: CircularProgressIndicator());
 
         if (state.list.isEmpty) {
           return Padding(
@@ -30,12 +31,18 @@ class VirologySection extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text('Virology', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Virology',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     _buildAddButton(context),
                   ],
                 ),
                 const SizedBox(height: 8),
-                const Text('No virology records', style: TextStyle(fontSize: 13, color: Colors.black54)),
+                // const Text('No virology records', style: TextStyle(fontSize: 13, color: Colors.black54)),
               ],
             ),
           );
@@ -47,33 +54,45 @@ class VirologySection extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-         
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Virology', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Virology',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                   _buildAddButton(context),
                 ],
               ),
               const SizedBox(height: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: state.list.map((item) => _buildCard(context, item)).toList(),
+                children: state.list
+                    .map((item) => _buildCard(context, item))
+                    .toList(),
               ),
-             ],
-           ),
-         );
-       },
-     );
-   }
+            ],
+          ),
+        );
+      },
+    );
+  }
 
-   Widget _buildAddButton(BuildContext context) {
+  Widget _buildAddButton(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)]),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)],
+        ),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 8, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -87,7 +106,13 @@ class VirologySection extends StatelessWidget {
               children: const [
                 Icon(Icons.add, color: Colors.white, size: 18),
                 SizedBox(width: 8),
-                Text('Add Virology', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                Text(
+                  'Add Virology',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
           ),
@@ -96,102 +121,130 @@ class VirologySection extends StatelessWidget {
     );
   }
 
-   Widget _buildCard(BuildContext context, Virology item) {
-     return Container(
-       margin: const EdgeInsets.symmetric(vertical: 6),
-       decoration: BoxDecoration(
-         color: Colors.blue.shade50,
-         borderRadius: BorderRadius.circular(14),
-         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 6))],
-       ),
-       child: Row(
-         children: [
-           Container(
-             width: 6,
-             height: 160,
-             decoration: BoxDecoration(
-               gradient: const LinearGradient(colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-               borderRadius: const BorderRadius.only(topLeft: Radius.circular(14), bottomLeft: Radius.circular(14)),
-             ),
-           ),
-           const SizedBox(width: 12),
-           const Padding(
-             padding: EdgeInsets.only(left: 6, right: 6),
-             child: CircleAvatar(radius: 22, backgroundColor: Color(0xFFEEF2FF), child: Icon(Icons.biotech, color: Color(0xFF3B82F6))),
-           ),
-           const SizedBox(width: 12),
-           Expanded(
-             child: Padding(
-               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
-               child: Column(
-                 crossAxisAlignment: CrossAxisAlignment.start,
-                 children: [
-                   Text(
-                     _formatDate(item.date),
-                     style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                   ),
-                   const SizedBox(height: 8),
-                   Wrap(
-                     spacing: 8,
-                     runSpacing: 6,
-                     children: [
-                       _infoChip('HAV IgM', item.havIgm),
-                       _infoChip('HAV IgG', item.havIgG),
-                       _infoChip('HBsAg', item.hbsAg),
-                       _infoChip('HBsAb', item.hbsAb),
-                       _infoChip('HBC IgM', item.hbcIgM),
-                       _infoChip('HBC IgG', item.hbcIgG),
-                       _infoChip('HBeAg', item.hbeAg),
-                       _infoChip('HBeAb', item.hbeAb),
-                       _infoChip('HCV Ab', item.hcvAb),
-                       _infoChip('HIV Ab I/II', item.hivAbI_II),
-                       _infoChip('HBV DNA PCR', item.hbvDnaPcr),
-                       _infoChip('HCV RNA PCR', item.hcvRnaPcr),
-                     ],
-                   ),
-                 ],
-               ),
-             ),
-           ),
-           Padding(
-             padding: const EdgeInsets.only(right: 8.0),
-             child: IconButton(onPressed: () => context.read<VirologyCubit>().delete(item.id!), icon: const Icon(Icons.delete_outline, color: Colors.grey)),
-           ),
-         ],
-       ),
-     );
-   }
+  Widget _buildCard(BuildContext context, Virology item) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 6,
+            height: 160,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(14),
+                bottomLeft: Radius.circular(14),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Padding(
+            padding: EdgeInsets.only(left: 6, right: 6),
+            child: CircleAvatar(
+              radius: 22,
+              backgroundColor: Color(0xFFEEF2FF),
+              child: Icon(Icons.biotech, color: Color(0xFF3B82F6)),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _formatDate(item.date),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: [
+                      _infoChip('HAV IgM', item.havIgm),
+                      _infoChip('HAV IgG', item.havIgG),
+                      _infoChip('HBsAg', item.hbsAg),
+                      _infoChip('HBsAb', item.hbsAb),
+                      _infoChip('HBC IgM', item.hbcIgM),
+                      _infoChip('HBC IgG', item.hbcIgG),
+                      _infoChip('HBeAg', item.hbeAg),
+                      _infoChip('HBeAb', item.hbeAb),
+                      _infoChip('HCV Ab', item.hcvAb),
+                      _infoChip('HIV Ab I/II', item.hivAbI_II),
+                      _infoChip('HBV DNA PCR', item.hbvDnaPcr),
+                      _infoChip('HCV RNA PCR', item.hcvRnaPcr),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: IconButton(
+              onPressed: () => context.read<VirologyCubit>().delete(item.id!),
+              icon: const Icon(Icons.delete_outline, color: Colors.grey),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-   String _formatDate(String raw) {
-     try {
-       final parsed = DateTime.tryParse(raw);
-       if (parsed != null) return '${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}';
-     } catch (_) {}
-     return raw.contains('T') ? raw.split('T').first : raw;
-   }
+  String _formatDate(String raw) {
+    try {
+      final parsed = DateTime.tryParse(raw);
+      if (parsed != null)
+        return '${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}';
+    } catch (_) {}
+    return raw.contains('T') ? raw.split('T').first : raw;
+  }
 
-   void _showAddDialog(BuildContext context) {
-     showDialog(
-       context: context,
-       builder: (dialogContext) => BlocProvider.value(value: context.read<VirologyCubit>(), child: AddVirologyDialog(patientId: patient.id!)),
-     );
-   }
+  void _showAddDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => BlocProvider.value(
+        value: context.read<VirologyCubit>(),
+        child: AddVirologyDialog(patientId: patient.id!),
+      ),
+    );
+  }
 
-   Widget _infoChip(String label, String? value) {
-     return Chip(
-       backgroundColor: Colors.grey.shade100,
-       label: Text(
-         '$label: ${value ?? '-'}',
-         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-       ),
-       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-     );
-   }
+  Widget _infoChip(String label, String? value) {
+    return Chip(
+      backgroundColor: Colors.grey.shade100,
+      label: Text(
+        '$label: ${value ?? '-'}',
+        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+    );
+  }
 }
 
 class AddVirologyDialog extends StatefulWidget {
   final int patientId;
-  const AddVirologyDialog({Key? key, required this.patientId}) : super(key: key);
+  const AddVirologyDialog({Key? key, required this.patientId})
+    : super(key: key);
 
   @override
   State<AddVirologyDialog> createState() => _AddVirologyDialogState();
@@ -268,7 +321,12 @@ class _AddVirologyDialogState extends State<AddVirologyDialog> {
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
-    final picked = await showDatePicker(context: context, initialDate: now, firstDate: DateTime(2000), lastDate: now);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(2000),
+      lastDate: now,
+    );
     if (picked != null) setState(() => _date = picked);
   }
 
@@ -280,26 +338,46 @@ class _AddVirologyDialogState extends State<AddVirologyDialog> {
       child: SingleChildScrollView(
         child: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+            gradient: LinearGradient(
+              colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             borderRadius: BorderRadius.all(Radius.circular(14)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: Row(
                   children: [
-                    const Text('Add Virology', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Add Virology',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const Spacer(),
-                    IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: () => Navigator.of(context).pop()),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
                   ],
                 ),
               ),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -307,8 +385,17 @@ class _AddVirologyDialogState extends State<AddVirologyDialog> {
                       InkWell(
                         onTap: _pickDate,
                         child: InputDecorator(
-                          decoration: InputDecoration(labelText: 'Date', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50),
-                          child: Text(_date == null ? 'Select Date' : '${_date!.day}/${_date!.month}/${_date!.year}'),
+                          decoration: InputDecoration(
+                            labelText: 'Date',
+                            border: const OutlineInputBorder(),
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+                          ),
+                          child: Text(
+                            _date == null
+                                ? 'Select Date'
+                                : '${_date!.day}/${_date!.month}/${_date!.year}',
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -329,9 +416,19 @@ class _AddVirologyDialogState extends State<AddVirologyDialog> {
                         width: double.infinity,
                         child: Container(
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 8, offset: const Offset(0, 4))],
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.12),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
                           child: Material(
                             color: Colors.transparent,
@@ -339,11 +436,28 @@ class _AddVirologyDialogState extends State<AddVirologyDialog> {
                               borderRadius: BorderRadius.circular(12),
                               onTap: _submit,
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [Icon(Icons.check, color: Colors.white, size: 20), SizedBox(width: 10), Text('Add Virology', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16))],
+                                  children: const [
+                                    Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'Add Virology',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -365,7 +479,8 @@ class _AddVirologyDialogState extends State<AddVirologyDialog> {
 class _TextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
-  const _TextField({Key? key, required this.controller, this.label = ''}) : super(key: key);
+  const _TextField({Key? key, required this.controller, this.label = ''})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -377,8 +492,14 @@ class _TextField extends StatelessWidget {
           labelText: label,
           filled: true,
           fillColor: Colors.grey.shade50,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 12,
+          ),
         ),
       ),
     );

@@ -13,13 +13,17 @@ class InflammatoryMarkersSection extends StatelessWidget {
     // ensure data is loaded after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
-        context.read<InflammatoryMarkersCubit>().loadForPatient(patient.id!, force: true);
+        context.read<InflammatoryMarkersCubit>().loadForPatient(
+          patient.id!,
+          force: true,
+        );
       } catch (_) {}
     });
 
     return BlocBuilder<InflammatoryMarkersCubit, InflammatoryMarkersState>(
       builder: (context, state) {
-        if (state.isLoading) return const Center(child: CircularProgressIndicator());
+        if (state.isLoading)
+          return const Center(child: CircularProgressIndicator());
 
         if (state.list.isEmpty) {
           return Padding(
@@ -31,12 +35,16 @@ class InflammatoryMarkersSection extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text('Inflammatory Markers', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Inflammatory Markers',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     _buildAddButton(context),
                   ],
                 ),
-                const SizedBox(height: 8),
-                const Text('No inflammatory marker records', style: TextStyle(fontSize: 13, color: Colors.black54)),
               ],
             ),
           );
@@ -50,14 +58,23 @@ class InflammatoryMarkersSection extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8)),
-                child: Text('Count: ${state.list.length}', style: const TextStyle(fontWeight: FontWeight.w600)),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Count: ${state.list.length}',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
               ),
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Inflammatory Markers', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Inflammatory Markers',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                   _buildAddButton(context),
                 ],
               ),
@@ -81,9 +98,17 @@ class InflammatoryMarkersSection extends StatelessWidget {
   Widget _buildAddButton(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)]),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)],
+        ),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 8, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -97,7 +122,13 @@ class InflammatoryMarkersSection extends StatelessWidget {
               children: const [
                 Icon(Icons.add, color: Colors.white, size: 18),
                 SizedBox(width: 8),
-                Text('Add', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                Text(
+                  'Add',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
           ),
@@ -112,7 +143,13 @@ class InflammatoryMarkersSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.green.shade50,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 6))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -120,14 +157,25 @@ class InflammatoryMarkersSection extends StatelessWidget {
             width: 6,
             height: 140,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF10B981), Color(0xFF059669)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                bottomLeft: Radius.circular(12),
+              ),
             ),
           ),
           const SizedBox(width: 12),
           const Padding(
             padding: EdgeInsets.only(left: 6, right: 6),
-            child: CircleAvatar(radius: 20, backgroundColor: Color(0xFFEFFDF6), child: Icon(Icons.thermostat, color: Color(0xFF10B981))),
+            child: CircleAvatar(
+              radius: 20,
+              backgroundColor: Color(0xFFEFFDF6),
+              child: Icon(Icons.thermostat, color: Color(0xFF10B981)),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -136,7 +184,13 @@ class InflammatoryMarkersSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(_formatDate(item.date), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                  Text(
+                    _formatDate(item.date),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -153,7 +207,11 @@ class InflammatoryMarkersSection extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(onPressed: () => context.read<InflammatoryMarkersCubit>().delete(item.id!), icon: const Icon(Icons.delete_outline, color: Colors.grey)),
+            child: IconButton(
+              onPressed: () =>
+                  context.read<InflammatoryMarkersCubit>().delete(item.id!),
+              icon: const Icon(Icons.delete_outline, color: Colors.grey),
+            ),
           ),
         ],
       ),
@@ -163,7 +221,8 @@ class InflammatoryMarkersSection extends StatelessWidget {
   String _formatDate(String raw) {
     try {
       final parsed = DateTime.tryParse(raw);
-      if (parsed != null) return '${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}';
+      if (parsed != null)
+        return '${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}';
     } catch (_) {}
     return raw.contains('T') ? raw.split('T').first : raw;
   }
@@ -171,14 +230,20 @@ class InflammatoryMarkersSection extends StatelessWidget {
   void _showAddDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (dialogContext) => BlocProvider.value(value: context.read<InflammatoryMarkersCubit>(), child: AddInflammatoryMarkersDialog(patientId: patient.id!)),
+      builder: (dialogContext) => BlocProvider.value(
+        value: context.read<InflammatoryMarkersCubit>(),
+        child: AddInflammatoryMarkersDialog(patientId: patient.id!),
+      ),
     );
   }
 
   Widget _infoChip(String label, String? value) {
     return Chip(
       backgroundColor: Colors.grey.shade100,
-      label: Text('$label: ${value ?? '-'}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+      label: Text(
+        '$label: ${value ?? '-'}',
+        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
     );
   }
@@ -186,13 +251,16 @@ class InflammatoryMarkersSection extends StatelessWidget {
 
 class AddInflammatoryMarkersDialog extends StatefulWidget {
   final int patientId;
-  const AddInflammatoryMarkersDialog({Key? key, required this.patientId}) : super(key: key);
+  const AddInflammatoryMarkersDialog({Key? key, required this.patientId})
+    : super(key: key);
 
   @override
-  State<AddInflammatoryMarkersDialog> createState() => _AddInflammatoryMarkersDialogState();
+  State<AddInflammatoryMarkersDialog> createState() =>
+      _AddInflammatoryMarkersDialogState();
 }
 
-class _AddInflammatoryMarkersDialogState extends State<AddInflammatoryMarkersDialog> {
+class _AddInflammatoryMarkersDialogState
+    extends State<AddInflammatoryMarkersDialog> {
   final _formKey = GlobalKey<FormState>();
   DateTime? _date;
 
@@ -220,9 +288,15 @@ class _AddInflammatoryMarkersDialogState extends State<AddInflammatoryMarkersDia
     final item = InflammatoryMarkers(
       patientId: widget.patientId,
       date: _date!.toIso8601String(),
-      esr: esrCtrl.text.trim().isEmpty ? null : double.tryParse(esrCtrl.text.trim()),
-      crp: crpCtrl.text.trim().isEmpty ? null : double.tryParse(crpCtrl.text.trim()),
-      asot: asotCtrl.text.trim().isEmpty ? null : double.tryParse(asotCtrl.text.trim()),
+      esr: esrCtrl.text.trim().isEmpty
+          ? null
+          : double.tryParse(esrCtrl.text.trim()),
+      crp: crpCtrl.text.trim().isEmpty
+          ? null
+          : double.tryParse(crpCtrl.text.trim()),
+      asot: asotCtrl.text.trim().isEmpty
+          ? null
+          : double.tryParse(asotCtrl.text.trim()),
       createdAt: DateTime.now().toIso8601String(),
     );
 
@@ -236,7 +310,12 @@ class _AddInflammatoryMarkersDialogState extends State<AddInflammatoryMarkersDia
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
-    final picked = await showDatePicker(context: context, initialDate: now, firstDate: DateTime(2000), lastDate: now);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(2000),
+      lastDate: now,
+    );
     if (picked != null) setState(() => _date = picked);
   }
 
@@ -248,26 +327,46 @@ class _AddInflammatoryMarkersDialogState extends State<AddInflammatoryMarkersDia
       child: SingleChildScrollView(
         child: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+            gradient: LinearGradient(
+              colors: [Color(0xFF10B981), Color(0xFF059669)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             borderRadius: BorderRadius.all(Radius.circular(14)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: Row(
                   children: [
-                    const Text('Add Inflammatory Markers', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Add Inflammatory Markers',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const Spacer(),
-                    IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: () => Navigator.of(context).pop()),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
                   ],
                 ),
               ),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -275,8 +374,17 @@ class _AddInflammatoryMarkersDialogState extends State<AddInflammatoryMarkersDia
                       InkWell(
                         onTap: _pickDate,
                         child: InputDecorator(
-                          decoration: InputDecoration(labelText: 'Date', border: const OutlineInputBorder(), filled: true, fillColor: Colors.grey.shade50),
-                          child: Text(_date == null ? 'Select Date' : '${_date!.day}/${_date!.month}/${_date!.year}'),
+                          decoration: InputDecoration(
+                            labelText: 'Date',
+                            border: const OutlineInputBorder(),
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+                          ),
+                          child: Text(
+                            _date == null
+                                ? 'Select Date'
+                                : '${_date!.day}/${_date!.month}/${_date!.year}',
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -288,9 +396,19 @@ class _AddInflammatoryMarkersDialogState extends State<AddInflammatoryMarkersDia
                         width: double.infinity,
                         child: Container(
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF10B981), Color(0xFF059669)],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 8, offset: const Offset(0, 4))],
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.12),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
                           child: Material(
                             color: Colors.transparent,
@@ -298,11 +416,28 @@ class _AddInflammatoryMarkersDialogState extends State<AddInflammatoryMarkersDia
                               borderRadius: BorderRadius.circular(12),
                               onTap: _submit,
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [Icon(Icons.check, color: Colors.white, size: 20), SizedBox(width: 10), Text('Add', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16))],
+                                  children: const [
+                                    Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'Add',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -324,7 +459,8 @@ class _AddInflammatoryMarkersDialogState extends State<AddInflammatoryMarkersDia
 class _NumberField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
-  const _NumberField({Key? key, required this.controller, required this.label}) : super(key: key);
+  const _NumberField({Key? key, required this.controller, required this.label})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -337,8 +473,14 @@ class _NumberField extends StatelessWidget {
           labelText: label,
           filled: true,
           fillColor: Colors.grey.shade50,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 12,
+          ),
         ),
       ),
     );
