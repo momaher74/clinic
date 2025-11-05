@@ -23,10 +23,19 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
   }
 
   Future<void> _loadComplaints() async {
-    await _db.createTableWithAttributes('complaints', ['patient_id','date','type','description']);
+    await _db.createTableWithAttributes('complaints', [
+      'patient_id',
+      'date',
+      'type',
+      'description',
+    ]);
     final rows = await _db.getAll('complaints');
     _complaints.clear();
-    _complaints.addAll(rows.map((r) => Complaint.fromMap(r)).where((c) => c.patientId == widget.patient.id));
+    _complaints.addAll(
+      rows
+          .map((r) => Complaint.fromMap(r))
+          .where((c) => c.patientId == widget.patient.id),
+    );
     setState(() {});
   }
 
@@ -35,7 +44,10 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
 
     final result = await showDialog<Complaint?>(
       context: context,
-      builder: (_) => AddComplaintDialog(initialDescription: prev, patientId: widget.patient.id!),
+      builder: (_) => AddComplaintDialog(
+        initialDescription: prev,
+        patientId: widget.patient.id!,
+      ),
     );
 
     if (result != null) {
@@ -56,10 +68,18 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Remove complaint'),
-        content: const Text('Are you sure you want to remove this complaint? This action cannot be undone.'),
+        content: const Text(
+          'Are you sure you want to remove this complaint? This action cannot be undone.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Remove', style: TextStyle(color: Colors.red))),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+          ),
         ],
       ),
     );
@@ -72,7 +92,9 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
       _complaints.removeWhere((e) => e.id == c.id);
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Complaint removed')));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Complaint removed')));
   }
 
   @override
@@ -82,24 +104,35 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            Text('Complaints'), 
+            Text('Complaints'),
             SizedBox(width: 8),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                border: Border.all(color: primaryColor , width: 2),
+                border: Border.all(color: primaryColor, width: 2),
                 borderRadius: BorderRadius.circular(6),
-                
-
               ),
-              child: Text('— ${widget.patient.name}', style: TextStyle(fontSize: 14, color: Colors.grey[700], fontWeight: FontWeight.w500))),
+              child: Text(
+                '— ${widget.patient.name}',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
           ],
         ),
         elevation: 0,
         backgroundColor: Colors.white,
       ),
       body: _complaints.isEmpty
-          ? Center(child: Text('No complaints for ${widget.patient.name}', style: TextStyle(fontSize: 16, color: Colors.grey[700])))
+          ? Center(
+              child: Text(
+                'No complaints for ${widget.patient.name}',
+                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+              ),
+            )
           : ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: _complaints.length,
@@ -107,14 +140,19 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
               itemBuilder: (context, i) {
                 final c = _complaints[i];
                 return Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                   color: Colors.white,
                   shadowColor: Colors.black,
                   elevation: 5,
                   child: SizedBox(
                     height: 140,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       // Use a Row-based layout to avoid ListTile automatic sizing issues
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -122,7 +160,10 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
                           CircleAvatar(
                             radius: 26,
                             backgroundColor: Colors.blue.shade50,
-                            child: Icon(Icons.comment, color: Colors.blue.shade700),
+                            child: Icon(
+                              Icons.comment,
+                              color: Colors.blue.shade700,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           // Main content
@@ -131,7 +172,13 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(c.type, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                                Text(
+                                  c.type,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
                                 const SizedBox(height: 6),
                                 Text(
                                   c.description,
@@ -149,7 +196,13 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Chip(
-                                label: Text(_formatDate(c.date), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                label: Text(
+                                  _formatDate(c.date),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 backgroundColor: Colors.grey[100],
                               ),
                               const SizedBox(height: 8),
@@ -159,7 +212,11 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
                                 child: IconButton(
                                   padding: EdgeInsets.zero,
                                   onPressed: () => _confirmDelete(c),
-                                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.redAccent,
+                                    size: 20,
+                                  ),
                                   tooltip: 'Remove complaint',
                                 ),
                               ),
@@ -173,10 +230,9 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
-        
         onPressed: _addComplaint,
-        icon:  Icon(Icons.add_comment_outlined , color: Colors.white,),
-        label:  Text('New Complaint' , style: TextStyle(color: Colors.white),),
+        icon: Icon(Icons.add_comment_outlined, color: Colors.white),
+        label: Text('New Complaint', style: TextStyle(color: Colors.white)),
         backgroundColor: primaryColor,
       ),
     );
@@ -186,7 +242,11 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
 class AddComplaintDialog extends StatefulWidget {
   final String initialDescription;
   final int patientId;
-  const AddComplaintDialog({super.key, required this.initialDescription, required this.patientId});
+  const AddComplaintDialog({
+    super.key,
+    required this.initialDescription,
+    required this.patientId,
+  });
 
   @override
   State<AddComplaintDialog> createState() => _AddComplaintDialogState();
@@ -231,7 +291,8 @@ class _AddComplaintDialogState extends State<AddComplaintDialog> {
     Navigator.of(context).pop(c);
   }
 
-  String _formatDate(DateTime dt) => '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+  String _formatDate(DateTime dt) =>
+      '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
 
   @override
   Widget build(BuildContext context) {
@@ -291,7 +352,10 @@ class _AddComplaintDialogState extends State<AddComplaintDialog> {
                       value: _type,
                       items: const [
                         DropdownMenuItem(value: 'Check', child: Text('Check')),
-                        DropdownMenuItem(value: 'Recheck', child: Text('Recheck')),
+                        DropdownMenuItem(
+                          value: 'Recheck',
+                          child: Text('Recheck'),
+                        ),
                       ],
                       onChanged: (v) => setState(() => _type = v ?? 'Check'),
                       decoration: InputDecoration(
@@ -299,8 +363,14 @@ class _AddComplaintDialogState extends State<AddComplaintDialog> {
                         prefixIcon: const Icon(Icons.comment),
                         filled: true,
                         fillColor: Colors.grey.shade50,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
+                        ),
                       ),
                     ),
 
@@ -320,8 +390,14 @@ class _AddComplaintDialogState extends State<AddComplaintDialog> {
                                   prefixIcon: const Icon(Icons.calendar_today),
                                   filled: true,
                                   fillColor: Colors.grey.shade50,
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 14,
+                                  ),
                                 ),
                               ),
                             ),
@@ -343,17 +419,36 @@ class _AddComplaintDialogState extends State<AddComplaintDialog> {
                         alignLabelWithHint: true,
                         filled: true,
                         fillColor: Colors.grey.shade50,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
+                        ),
                       ),
                     ),
 
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        Expanded(child: OutlinedButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel'))),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
                         const SizedBox(width: 12),
-                        Expanded(child: ElevatedButton(onPressed: _submit, child: const Text('Save'))),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _submit,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                            ),
+                            child: Text('Save', style: whiteStyle),
+                          ),
+                        ),
                       ],
                     ),
                   ],

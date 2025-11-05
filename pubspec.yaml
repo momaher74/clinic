@@ -55,6 +55,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.11.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -68,11 +69,26 @@ flutter:
   uses-material-design: true
 
   # App assets
-  # If you add an app logo, place it under assets/images and add it here.
-  # The clinic logo entry was removed to avoid build errors when the file is missing.
-  # Example to add later:
-  # assets:
-  #   - assets/images/clinic_logo.png
+  # Include the clinic logo so it is available to tools and the app.
+  assets:
+    - assets/images/clinc_logo.png
+
+# Configuration for flutter_launcher_icons (generates Android & iOS icons)
+# After placing the image at assets/icons/app_icon.png run:
+#   flutter pub get ; flutter pub run flutter_launcher_icons:main
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/clinc_logo.png"
+  # For Android adaptive icons you can use a background color or image.
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/images/clinc_logo.png"
+  windows:
+    image_path: "assets/images/clinc_logo.png"
+  macos:
+    image_path: "assets/images/clinc_logo.png"
+  linux:
+    image_path: "assets/images/clinc_logo.png"
 
   # To add assets to your application, add an assets section, like this:
   # assets:

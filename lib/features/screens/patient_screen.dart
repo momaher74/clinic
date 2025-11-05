@@ -1,3 +1,4 @@
+import 'package:clinic/core/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:clinic/core/models/patient.dart';
@@ -12,18 +13,17 @@ class PatientScreen extends StatefulWidget {
 }
 
 class _PatientScreenState extends State<PatientScreen> {
- 
   final TextEditingController _searchCtrl = TextEditingController();
   @override
   void initState() {
     super.initState();
 
-
     context.read<PatientCubit>().loadPatients();
     _searchCtrl.addListener(_onSearchChanged);
   }
 
-  void _onSearchChanged() => context.read<PatientCubit>().search(_searchCtrl.text);
+  void _onSearchChanged() =>
+      context.read<PatientCubit>().search(_searchCtrl.text);
 
   @override
   void dispose() {
@@ -50,15 +50,22 @@ class _PatientScreenState extends State<PatientScreen> {
     return BlocProvider.value(
       value: context.read<PatientCubit>(),
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          title:  Text('Patients' , style: const TextStyle(color: Colors.black87 , fontWeight: FontWeight.bold , fontSize: 16),),
+          title: Text(
+            'Patients',
+            style: const TextStyle(
+              color: Colors.black87,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
           elevation: 0,
           backgroundColor: Colors.white,
           foregroundColor: Colors.black87,
-          
+
           automaticallyImplyLeading: false,
           bottom: PreferredSize(
-            
             preferredSize: const Size.fromHeight(72),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -84,7 +91,7 @@ class _PatientScreenState extends State<PatientScreen> {
                             vertical: 5,
                           ),
                         ),
-                        child:  Icon(Icons.add , color: Colors.white,),
+                        child: Icon(Icons.add, color: Colors.white),
                       ),
                     ],
                   ),
@@ -97,9 +104,11 @@ class _PatientScreenState extends State<PatientScreen> {
 
         body: BlocBuilder<PatientCubit, PatientState>(
           builder: (context, state) {
-            if (state.isLoading) return const Center(child: CircularProgressIndicator());
+            if (state.isLoading)
+              return const Center(child: CircularProgressIndicator());
             final list = state.filtered;
-            if (list.isEmpty) return const Center(child: Text('No patients found'));
+            if (list.isEmpty)
+              return const Center(child: Text('No patients found'));
             return Container(
               color: Colors.white,
               child: ListView.separated(
@@ -108,12 +117,15 @@ class _PatientScreenState extends State<PatientScreen> {
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final p = list[index];
-                  final selected = p.id != null && state.selectedIds.contains(p.id);
-              
+                  final selected =
+                      p.id != null && state.selectedIds.contains(p.id);
+
                   return GestureDetector(
-                    onLongPress: () => context.read<PatientCubit>().toggleSelection(p.id!),
+                    onLongPress: () =>
+                        context.read<PatientCubit>().toggleSelection(p.id!),
                     onTap: () {
-                      if (state.selectedIds.isNotEmpty) context.read<PatientCubit>().toggleSelection(p.id!);
+                      if (state.selectedIds.isNotEmpty)
+                        context.read<PatientCubit>().toggleSelection(p.id!);
                     },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
@@ -121,11 +133,17 @@ class _PatientScreenState extends State<PatientScreen> {
                         color: selected ? Colors.blue.shade50 : Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: selected ? const Color(0xFF3B82F6) : Colors.grey.shade200,
+                          color: selected
+                              ? const Color(0xFF3B82F6)
+                              : Colors.grey.shade200,
                           width: selected ? 1.8 : 1,
                         ),
                         boxShadow: [
-                          BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 6, offset: const Offset(0, 3)),
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 3),
+                          ),
                         ],
                       ),
                       child: Padding(
@@ -135,26 +153,46 @@ class _PatientScreenState extends State<PatientScreen> {
                             // Single-selection checkbox
                             Checkbox(
                               value: selected,
-                              onChanged: (v) => context.read<PatientCubit>().toggleSelection(p.id!),
+                              onChanged: (v) => context
+                                  .read<PatientCubit>()
+                                  .toggleSelection(p.id!),
                             ),
-              
+
                             const SizedBox(width: 8),
-              
+
                             // Patient details
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(p.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                                      Text(
+                                        p.name,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
                                       Column(
                                         children: [
-                                          Text('${p.age} Y', style: TextStyle(color: Colors.grey.shade700)),
+                                          Text(
+                                            '${p.age} Y',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade700,
+                                            ),
+                                          ),
                                           IconButton(
-                                            onPressed: () => context.read<PatientCubit>().deletePatient(p.id!),
-                                            icon: const Icon(Icons.delete_outline, size: 20, color: Colors.redAccent),
+                                            onPressed: () => context
+                                                .read<PatientCubit>()
+                                                .deletePatient(p.id!),
+                                            icon: const Icon(
+                                              Icons.delete_outline,
+                                              size: 20,
+                                              color: Colors.redAccent,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -162,26 +200,37 @@ class _PatientScreenState extends State<PatientScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   const SizedBox(height: 8),
-              
+
                                   Wrap(
                                     spacing: 12,
                                     runSpacing: 6,
                                     children: [
-                                      _infoChip(Icons.cake_outlined, _formatDate(p.birthdate)),
+                                      _infoChip(
+                                        Icons.cake_outlined,
+                                        _formatDate(p.birthdate),
+                                      ),
                                       _infoChip(Icons.male_outlined, p.sex),
-                                      _infoChip(Icons.home_outlined, p.residency),
+                                      _infoChip(
+                                        Icons.home_outlined,
+                                        p.residency,
+                                      ),
                                       _infoChip(Icons.phone_outlined, p.mobile),
                                     ],
                                   ),
-              
+
                                   if (p.note != null && p.note!.isNotEmpty) ...[
                                     const SizedBox(height: 8),
-                                    Text('Note: ${p.note}', style: TextStyle(color: Colors.grey.shade700)),
+                                    Text(
+                                      'Note: ${p.note}',
+                                      style: TextStyle(
+                                        color: Colors.grey.shade700,
+                                      ),
+                                    ),
                                   ],
                                 ],
                               ),
                             ),
-              
+
                             // Action icons
                           ],
                         ),
@@ -345,7 +394,8 @@ class _AddPatientDialogState extends State<AddPatientDialog> {
                         controller: nameCtrl,
                         label: 'Name',
                         prefixIcon: Icons.person,
-                        validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                        validator: (v) =>
+                            v == null || v.trim().isEmpty ? 'Required' : null,
                       ),
                       const SizedBox(height: 12),
 
@@ -358,20 +408,37 @@ class _AddPatientDialogState extends State<AddPatientDialog> {
                               child: AbsorbPointer(
                                 child: CustomTextField(
                                   controller: TextEditingController(
-                                    text: _birthdate == null ? '' : '${_birthdate!.day}/${_birthdate!.month}/${_birthdate!.year}',
+                                    text: _birthdate == null
+                                        ? ''
+                                        : '${_birthdate!.day}/${_birthdate!.month}/${_birthdate!.year}',
                                   ),
                                   label: 'Birthdate',
                                   prefixIcon: Icons.cake_outlined,
-                                  validator: (_) => _birthdate == null ? 'Select birthdate' : null,
+                                  validator: (_) => _birthdate == null
+                                      ? 'Select birthdate'
+                                      : null,
                                 ),
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                            decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
-                            child: Text(_birthdate == null ? '-' : '${_calculateAge(_birthdate!)} Y', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              _birthdate == null
+                                  ? '-'
+                                  : '${_calculateAge(_birthdate!)} Y',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -380,24 +447,70 @@ class _AddPatientDialogState extends State<AddPatientDialog> {
 
                       Row(
                         children: [
-                          Expanded(child: RadioListTile<String>(value: 'Male', groupValue: _sex, title: const Text('Male'), onChanged: (v) => setState(() => _sex = v!))),
-                          Expanded(child: RadioListTile<String>(value: 'Female', groupValue: _sex, title: const Text('Female'), onChanged: (v) => setState(() => _sex = v!))),
+                          Expanded(
+                            child: RadioListTile<String>(
+                              value: 'Male',
+                              groupValue: _sex,
+                              title: const Text('Male'),
+                              onChanged: (v) => setState(() => _sex = v!),
+                            ),
+                          ),
+                          Expanded(
+                            child: RadioListTile<String>(
+                              value: 'Female',
+                              groupValue: _sex,
+                              title: const Text('Female'),
+                              onChanged: (v) => setState(() => _sex = v!),
+                            ),
+                          ),
                         ],
                       ),
 
                       const SizedBox(height: 12),
-                      CustomTextField(controller: residencyCtrl, label: 'Residency', prefixIcon: Icons.home_outlined, validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+                      CustomTextField(
+                        controller: residencyCtrl,
+                        label: 'Residency',
+                        prefixIcon: Icons.home_outlined,
+                        validator: (v) =>
+                            v == null || v.trim().isEmpty ? 'Required' : null,
+                      ),
                       const SizedBox(height: 12),
-                      CustomTextField(controller: mobileCtrl, label: 'Mobile', prefixIcon: Icons.phone_outlined, keyboardType: TextInputType.phone, validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+                      CustomTextField(
+                        controller: mobileCtrl,
+                        label: 'Mobile',
+                        prefixIcon: Icons.phone_outlined,
+                        keyboardType: TextInputType.phone,
+                        validator: (v) =>
+                            v == null || v.trim().isEmpty ? 'Required' : null,
+                      ),
                       const SizedBox(height: 12),
-                      CustomTextField(controller: noteCtrl, label: 'Note (optional)', prefixIcon: Icons.note_outlined, maxLines: 4, validator: (_) => null),
+                      CustomTextField(
+                        controller: noteCtrl,
+                        label: 'Note (optional)',
+                        prefixIcon: Icons.note_outlined,
+                        maxLines: 4,
+                        validator: (_) => null,
+                      ),
 
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Expanded(child: OutlinedButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel'))),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Cancel'),
+                            ),
+                          ),
                           const SizedBox(width: 12),
-                          Expanded(child: ElevatedButton(onPressed: _submit, child: const Text('Save'))),
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                              ),
+                              onPressed: _submit,
+                              child: Text('Save', style: whiteStyle),
+                            ),
+                          ),
                         ],
                       ),
                     ],

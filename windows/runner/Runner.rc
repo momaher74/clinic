@@ -52,7 +52,9 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_APP_ICON            ICON                    "resources\\app_icon.ico"
+// Use project-level ico (placed in assets/icons) as the app icon.
+// Path is relative to this file (windows/runner), go up two levels to project root.
+IDI_APP_ICON            ICON                    "..\\..\\assets\\icons\\clinc_logo.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -90,12 +92,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "clinic" "\0"
+            VALUE "FileDescription", "Dr Saad Elbelasy Clinic's" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "clinic" "\0"
+            VALUE "InternalName", "Dr Saad Elbelasy Clinic's" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "clinic.exe" "\0"
-            VALUE "ProductName", "clinic" "\0"
+            VALUE "ProductName", "Dr Saad Elbelasy Clinic's" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

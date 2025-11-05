@@ -16,6 +16,14 @@ namespace {
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #endif
 
+// DWMWA_CAPTION_COLOR and DWMWA_TEXT_COLOR available on newer SDKs.
+#ifndef DWMWA_CAPTION_COLOR
+#define DWMWA_CAPTION_COLOR 35
+#endif
+#ifndef DWMWA_TEXT_COLOR
+#define DWMWA_TEXT_COLOR 36
+#endif
+
 constexpr const wchar_t kWindowClassName[] = L"FLUTTER_RUNNER_WIN32_WINDOW";
 
 /// Registry key for app theme preference.
@@ -284,5 +292,18 @@ void Win32Window::UpdateTheme(HWND const window) {
     BOOL enable_dark_mode = light_mode == 0;
     DwmSetWindowAttribute(window, DWMWA_USE_IMMERSIVE_DARK_MODE,
                           &enable_dark_mode, sizeof(enable_dark_mode));
+    // If light mode is preferred, explicitly set caption (title bar) color to white
+    // and title text color to black so the title bar appears white regardless of
+    // OS accent settings. Use COLORREF values (0x00BBGGRR).
+    if (!enable_dark_mode) {
+      DWORD caption_color = 0x00FFFFFF; // white: 0x00BBGGRR => 0x00FFFFFF
+      DWORD text_color = 0x00000000; // black
+      // Set caption background color (if supported on OS)
+      DwmSetWindowAttribute(window, DWMWA_CAPTION_COLOR, &caption_color,
+                            sizeof(caption_color));
+      // Set caption text color (if supported on OS)
+      DwmSetWindowAttribute(window, DWMWA_TEXT_COLOR, &text_color,
+                            sizeof(text_color));
+    }
   }
 }
