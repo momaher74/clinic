@@ -52,21 +52,67 @@ class DatabaseService {
   /// Example:
   /// await createTableWithAttributes('users', ['name', 'age', 'email']);
   Future<void> createTableWithAttributes(
-      String tableName, List<String> attributes) async {
+    String tableName,
+    List<String> attributes,
+  ) async {
     final db = await database;
 
-    // Convert names to SQL columns (default type = TEXT)
-    final columnsSql = attributes.map((attr) => '$attr TEXT').join(', ');
+    // Check if table exists
+    final tables = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+      [tableName],
+    );
 
-    final sql = '''
+    if (tables.isEmpty) {
+      // Table doesn't exist -> create it with all attributes
+      final columnsSql = attributes.map((attr) => '$attr TEXT').join(', ');
+      final sql =
+          '''
       CREATE TABLE IF NOT EXISTS $tableName (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         $columnsSql
       )
     ''';
+      await db.execute(sql);
+      print(
+        '✅ Table "$tableName" created with columns: id, ${attributes.join(', ')}',
+      );
+      return;
+    }
 
-    await db.execute(sql);
-    print('✅ Table "$tableName" created with columns: id, ${attributes.join(', ')}');
+    // Table exists -> inspect existing columns and add any missing ones
+    final existing = await db.rawQuery('PRAGMA table_info($tableName)');
+    final existingCols = <String>{};
+    for (final row in existing) {
+      final name = row['name']?.toString();
+      if (name != null) existingCols.add(name);
+    }
+
+    final missing = attributes.where((a) => !existingCols.contains(a)).toList();
+    for (final col in missing) {
+      final alter = 'ALTER TABLE $tableName ADD COLUMN $col TEXT';
+      try {
+        await db.execute(alter);
+        print('ℹ️ Added missing column "$col" to table "$tableName"');
+      } catch (e) {
+        // If another isolate/addition added the column concurrently, SQLite will
+        // raise a "duplicate column name" error. That's benign — re-check
+        // and continue. Re-throw other unexpected errors.
+        final msg = e.toString().toLowerCase();
+        if (msg.contains('duplicate column name') ||
+            msg.contains('duplicate column')) {
+          print('⚠️ Column "$col" already exists (concurrent add) — ignoring.');
+        } else {
+          rethrow;
+        }
+      }
+    }
+
+    if (missing.isEmpty) {
+      print(
+        '✅ Table "$tableName" already has columns: ${existingCols.join(', ')}',
+      );
+    }
   }
 
   // ------------------------------------------------------------------

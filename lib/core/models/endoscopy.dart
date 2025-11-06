@@ -7,6 +7,7 @@ class Endoscopy {
   String endoscopist;
   String followUp;
   String report;
+  String? imagePath;
   String createdAt;
 
   Endoscopy({
@@ -18,6 +19,7 @@ class Endoscopy {
     this.endoscopist = '',
     this.followUp = '',
     this.report = '',
+    this.imagePath,
     String? createdAt,
   }) : createdAt = createdAt ?? DateTime.now().toIso8601String();
 
@@ -31,6 +33,7 @@ class Endoscopy {
       'endoscopist': endoscopist,
       'follow_up': followUp,
       'report': report,
+      'image_path': imagePath,
       'created_at': createdAt,
     };
   }
@@ -38,7 +41,9 @@ class Endoscopy {
   factory Endoscopy.fromMap(Map<String, dynamic> m) {
     return Endoscopy(
       id: m['id'] is int ? m['id'] as int : int.tryParse('${m['id']}'),
-      patientId: m['patient_id'] is int ? m['patient_id'] as int : int.tryParse('${m['patient_id']}') ?? 0,
+      patientId: m['patient_id'] is int
+          ? m['patient_id'] as int
+          : int.tryParse('${m['patient_id']}') ?? 0,
       type: m['type'] ?? '',
       date: m['date'] ?? '',
       ec: m['ec'] ?? '',
@@ -46,6 +51,7 @@ class Endoscopy {
       followUp: m['follow_up'] ?? '',
       report: m['report'] ?? '',
       createdAt: m['created_at'] ?? DateTime.now().toIso8601String(),
+      imagePath: m['image_path'],
     );
   }
 }

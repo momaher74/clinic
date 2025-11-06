@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:clinic/core/models/patient.dart';
 import 'package:clinic/core/models/endoscopy.dart';
 import 'package:clinic/features/managers/endoscopy/colonoscopy_cubit.dart';
 import 'package:clinic/features/widgets/ogd_section_widgets.dart';
+import 'package:clinic/core/services/image_service.dart';
+import 'package:clinic/core/constants/constants.dart';
 
 class ColonoscopySection extends StatelessWidget {
   final Patient patient;
@@ -56,13 +60,22 @@ class ColonoscopySection extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       onTap: () => _showAddDialog(context),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: const [
                             Icon(Icons.add, color: Colors.white, size: 18),
                             SizedBox(width: 8),
-                            Text('Add Colonoscopy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                            Text(
+                              'Add Colonoscopy',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -84,7 +97,10 @@ class ColonoscopySection extends StatelessWidget {
                   children: [
                     const Text(
                       'Colonoscopy',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Container(
                       decoration: BoxDecoration(
@@ -108,13 +124,22 @@ class ColonoscopySection extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           onTap: () => _showAddDialog(context),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 8,
+                            ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: const [
                                 Icon(Icons.add, color: Colors.white, size: 18),
                                 SizedBox(width: 8),
-                                Text('Add Colonoscopy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                                Text(
+                                  'Add Colonoscopy',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -152,7 +177,10 @@ class ColonoscopySection extends StatelessWidget {
                               height: 120,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [Color(0xFF4ECDC4), Color(0xFF44A08D)],
+                                  colors: [
+                                    Color(0xFF4ECDC4),
+                                    Color(0xFF44A08D),
+                                  ],
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                 ),
@@ -163,34 +191,80 @@ class ColonoscopySection extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            const Padding(
-                              padding: EdgeInsets.only(left: 6, right: 6),
-                              child: CircleAvatar(
-                                radius: 22,
-                                backgroundColor: Color(0xFFE0F2F1),
-                                child: Icon(Icons.medical_services_outlined, color: Color(0xFF4ECDC4)),
-                              ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 6, right: 6),
+                              child:
+                                  item.imagePath != null &&
+                                      item.imagePath!.isNotEmpty
+                                  ? InkWell(
+                                      onTap: () => sharedOpenImage(
+                                        context,
+                                        item.imagePath!,
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(22),
+                                        child: Image.file(
+                                          File(item.imagePath!),
+                                          width: 44,
+                                          height: 44,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (ctx, err, st) =>
+                                              const CircleAvatar(
+                                                radius: 22,
+                                                backgroundColor: Color(
+                                                  0xFFE0F2F1,
+                                                ),
+                                                child: Icon(
+                                                  Icons
+                                                      .medical_services_outlined,
+                                                  color: Color(0xFF4ECDC4),
+                                                ),
+                                              ),
+                                        ),
+                                      ),
+                                    )
+                                  : const CircleAvatar(
+                                      radius: 22,
+                                      backgroundColor: Color(0xFFE0F2F1),
+                                      child: Icon(
+                                        Icons.medical_services_outlined,
+                                        color: Color(0xFF4ECDC4),
+                                      ),
+                                    ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 6,
+                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       _formatDate(item.date),
-                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
                                     const SizedBox(height: 8),
                                     Wrap(
                                       spacing: 8,
                                       runSpacing: 6,
                                       children: [
-                                        if (item.ec.isNotEmpty) _infoChip('EC', item.ec),
-                                        if (item.endoscopist.isNotEmpty) _infoChip('Endoscopist', item.endoscopist),
-                                        if (item.followUp.isNotEmpty) _infoChip('Follow Up', item.followUp),
-                                        if (item.report.isNotEmpty) _infoChip('Report', item.report),
+                                        if (item.ec.isNotEmpty)
+                                          _infoChip('EC', item.ec),
+                                        if (item.endoscopist.isNotEmpty)
+                                          _infoChip(
+                                            'Endoscopist',
+                                            item.endoscopist,
+                                          ),
+                                        if (item.followUp.isNotEmpty)
+                                          _infoChip('Follow Up', item.followUp),
+                                        if (item.report.isNotEmpty)
+                                          _infoChip('Report', item.report),
                                       ],
                                     ),
                                   ],
@@ -200,8 +274,13 @@ class ColonoscopySection extends StatelessWidget {
                             Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: IconButton(
-                                icon: const Icon(Icons.delete_outline, color: Colors.grey),
-                                onPressed: () => context.read<ColonoscopyC>().delete(item.id!),
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.grey,
+                                ),
+                                onPressed: () => context
+                                    .read<ColonoscopyC>()
+                                    .delete(item.id!),
                                 tooltip: 'Delete',
                               ),
                             ),
@@ -223,9 +302,7 @@ class ColonoscopySection extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => MultiBlocProvider(
-        providers: [
-          BlocProvider.value(value: context.read<ColonoscopyC>()),
-        ],
+        providers: [BlocProvider.value(value: context.read<ColonoscopyC>())],
         child: _ColonoscopyAddDialog(patientId: patient.id!),
       ),
     );
@@ -248,6 +325,7 @@ class _ColonoscopyAddDialogState extends State<_ColonoscopyAddDialog> {
   final endoscopistCtrl = TextEditingController();
   final followUpCtrl = TextEditingController();
   final reportCtrl = TextEditingController();
+  String? _imagePath;
 
   @override
   void initState() {
@@ -275,6 +353,11 @@ class _ColonoscopyAddDialogState extends State<_ColonoscopyAddDialog> {
     if (picked != null) setState(() => _date = picked);
   }
 
+  Future<void> _pickImage() async {
+    final stored = await ImageService.pickAndStoreImage();
+    if (stored != null) setState(() => _imagePath = stored);
+  }
+
   void _submit() async {
     if (!_formKey.currentState!.validate() || _date == null) return;
     final endoscopy = Endoscopy(
@@ -285,6 +368,7 @@ class _ColonoscopyAddDialogState extends State<_ColonoscopyAddDialog> {
       endoscopist: endoscopistCtrl.text.trim(),
       followUp: followUpCtrl.text.trim(),
       report: reportCtrl.text.trim(),
+      imagePath: _imagePath,
     );
     try {
       await context.read<ColonoscopyC>().add(endoscopy);
@@ -313,12 +397,19 @@ class _ColonoscopyAddDialogState extends State<_ColonoscopyAddDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: Row(
                   children: [
                     const Text(
                       'Add Colonoscopy',
-                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const Spacer(),
                     IconButton(
@@ -348,14 +439,119 @@ class _ColonoscopyAddDialogState extends State<_ColonoscopyAddDialog> {
                             filled: true,
                             fillColor: Colors.grey.shade50,
                           ),
-                          child: Text(_date == null ? 'Select Date' : '${_date!.day}/${_date!.month}/${_date!.year}'),
+                          child: Text(
+                            _date == null
+                                ? 'Select Date'
+                                : '${_date!.day}/${_date!.month}/${_date!.year}',
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
+                      if (_imagePath != null)
+                        Column(
+                          children: [
+                            GestureDetector(
+                              onTap: () =>
+                                  sharedOpenImage(context, _imagePath!),
+                              child: Center(
+                                child: Stack(
+                                  alignment: Alignment.topRight,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxHeight: 220,
+                                        ),
+                                        child: Image.file(
+                                          File(_imagePath!),
+                                          fit: BoxFit.contain,
+                                          width: double.infinity,
+                                          errorBuilder: (ctx, err, st) =>
+                                              Container(
+                                                height: 140,
+                                                color: Colors.grey.shade200,
+                                                child: const Icon(
+                                                  Icons.broken_image,
+                                                  size: 52,
+                                                ),
+                                              ),
+                                        ),
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Material(
+                                          color: Colors.black45,
+                                          shape: const CircleBorder(),
+                                          child: IconButton(
+                                            icon: const Icon(
+                                              Icons.edit,
+                                              color: Colors.white,
+                                              size: 18,
+                                            ),
+                                            onPressed: _pickImage,
+                                            tooltip: 'Change image',
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Material(
+                                          color: Colors.black45,
+                                          shape: const CircleBorder(),
+                                          child: IconButton(
+                                            icon: const Icon(
+                                              Icons.delete,
+                                              color: Colors.white,
+                                              size: 18,
+                                            ),
+                                            onPressed: () => setState(
+                                              () => _imagePath = null,
+                                            ),
+                                            tooltip: 'Remove image',
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Tap image to preview',
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      if (_imagePath == null)
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: _pickImage,
+                            icon: const Icon(Icons.photo_library_outlined),
+                            label: const Text('Pick Image (optional)'),
+                          ),
+                        ),
                       CustomTextField(controller: ecCtrl, label: 'EC'),
-                      CustomTextField(controller: endoscopistCtrl, label: 'Endoscopist'),
-                      CustomTextField(controller: followUpCtrl, label: 'Follow Up'),
-                      CustomTextField(controller: reportCtrl, label: 'Report', maxLines: 3),
+                      CustomTextField(
+                        controller: endoscopistCtrl,
+                        label: 'Endoscopist',
+                      ),
+                      CustomTextField(
+                        controller: followUpCtrl,
+                        label: 'Follow Up',
+                      ),
+                      CustomTextField(
+                        controller: reportCtrl,
+                        label: 'Report',
+                        maxLines: 3,
+                      ),
                       const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
@@ -386,9 +582,20 @@ class _ColonoscopyAddDialogState extends State<_ColonoscopyAddDialog> {
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.check, color: Colors.white, size: 20),
+                                    Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
                                     SizedBox(width: 10),
-                                    Text('Add Colonoscopy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
+                                    Text(
+                                      'Add Colonoscopy',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 16,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -421,7 +628,10 @@ String _formatDate(String date) {
 Widget _infoChip(String label, String? value) {
   return Chip(
     backgroundColor: Colors.grey.shade100,
-    label: Text('$label: ${value ?? '-'}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+    label: Text(
+      '$label: ${value ?? '-'}',
+      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+    ),
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
   );
 }

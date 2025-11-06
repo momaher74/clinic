@@ -1,5 +1,7 @@
 import 'package:clinic/core/constants/constants.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:clinic/core/services/image_service.dart';
 import 'package:clinic/core/models/patient.dart';
 import 'package:clinic/core/models/complaint.dart';
 import 'package:clinic/core/services/sql_service.dart';
@@ -28,6 +30,7 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
       'date',
       'type',
       'description',
+      'image_path',
     ]);
     final rows = await _db.getAll('complaints');
     _complaints.clear();
@@ -88,6 +91,13 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
     if (c.id == null) return;
 
     await _db.delete('complaints', c.id!);
+    // Attempt to remove the stored image file for this complaint so we don't
+    // leave orphaned files in app storage. Failure here is non-fatal.
+    if (c.imagePath != null && c.imagePath!.isNotEmpty) {
+      try {
+        await ImageService.deleteStoredImage(c.imagePath!);
+      } catch (_) {}
+    }
     setState(() {
       _complaints.removeWhere((e) => e.id == c.id);
     });
@@ -157,14 +167,28 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          CircleAvatar(
-                            radius: 26,
-                            backgroundColor: Colors.blue.shade50,
-                            child: Icon(
-                              Icons.comment,
-                              color: Colors.blue.shade700,
+                          if (c.imagePath != null && c.imagePath!.isNotEmpty)
+                            GestureDetector(
+                              onTap: () => _showImage(context, c.imagePath!),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(
+                                  File(c.imagePath!),
+                                  width: 52,
+                                  height: 52,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            )
+                          else
+                            CircleAvatar(
+                              radius: 26,
+                              backgroundColor: Colors.blue.shade50,
+                              child: Icon(
+                                Icons.comment,
+                                color: Colors.blue.shade700,
+                              ),
                             ),
-                          ),
                           const SizedBox(width: 12),
                           // Main content
                           Expanded(
@@ -237,6 +261,40 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
       ),
     );
   }
+
+  void _showImage(BuildContext context, String path) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        child: Container(
+          color: Colors.white,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(ctx).pop(),
+                ),
+              ),
+              Flexible(
+                child: InteractiveViewer(
+                  panEnabled: true,
+                  minScale: 0.5,
+                  maxScale: 4.0,
+                  child: Image.file(File(path)),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class AddComplaintDialog extends StatefulWidget {
@@ -256,6 +314,7 @@ class _AddComplaintDialogState extends State<AddComplaintDialog> {
   String _type = 'Check';
   final _descCtrl = TextEditingController();
   late DateTime _selectedDate;
+  String? _imagePath;
 
   @override
   void initState() {
@@ -281,12 +340,28 @@ class _AddComplaintDialogState extends State<AddComplaintDialog> {
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
+  Future<void> _pickImage() async {
+    // Delegate picking and storing to the ImageService so other screens can
+    // reuse the same logic.
+    final stored = await ImageService.pickAndStoreImage();
+    if (stored != null) setState(() => _imagePath = stored);
+  }
+
+  // Image storing is handled by ImageService.
+
+  void _removeImage() {
+    setState(() {
+      _imagePath = null;
+    });
+  }
+
   void _submit() {
     final c = Complaint(
       patientId: widget.patientId,
       date: _selectedDate.toIso8601String(),
       type: _type,
       description: _descCtrl.text.trim(),
+      imagePath: _imagePath,
     );
     Navigator.of(context).pop(c);
   }
@@ -430,6 +505,81 @@ class _AddComplaintDialogState extends State<AddComplaintDialog> {
                       ),
                     ),
 
+                    const SizedBox(height: 16),
+                    // Image picker preview: show a smaller thumbnail and put buttons
+                    // (Change / Remove) to the right on the same row for a compact layout.
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (_imagePath != null) ...[
+                          LayoutBuilder(
+                            builder: (ctx, constraints) {
+                              final maxThumbWidth = constraints.maxWidth >= 360
+                                  ? 320.0
+                                  : constraints.maxWidth * 0.9;
+                              return Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  // Thumbnail
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      File(_imagePath!),
+                                      width: maxThumbWidth,
+                                      height: 140,
+                                      fit: BoxFit.fitHeight,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+
+                                  // Buttons on the same row; wrap if space is constrained
+                                  Expanded(
+                                    child: Wrap(
+                                      alignment: WrapAlignment.start,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: [
+                                        ElevatedButton.icon(
+                                          onPressed: _pickImage,
+                                          icon: const Icon(
+                                            Icons.edit,
+                                            size: 18,
+                                          ),
+                                          label: Text(
+                                            'Change',
+                                            style: whiteStyle,
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: primaryColor,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 30,
+                                              vertical: 20,
+                                            ),
+                                          ),
+                                        ),
+                                        OutlinedButton(
+                                          onPressed: _removeImage,
+                                          child: const Text('Remove'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                        ] else ...[
+                          OutlinedButton.icon(
+                            onPressed: _pickImage,
+                            icon: const Icon(Icons.add_a_photo_outlined),
+                            label: const Text('Add Image'),
+                          ),
+                        ],
+                      ],
+                    ),
                     const SizedBox(height: 16),
                     Row(
                       children: [

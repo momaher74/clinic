@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:clinic/core/models/endoscopy.dart';
+import 'package:clinic/core/services/image_service.dart';
 import 'package:clinic/core/services/sql_service.dart';
 
 class EusState {
@@ -10,7 +11,11 @@ class EusState {
   EusState({this.isLoading = false, this.error, this.list = const []});
 
   EusState copyWith({bool? isLoading, String? error, List<Endoscopy>? list}) =>
-      EusState(isLoading: isLoading ?? this.isLoading, error: error ?? this.error, list: list ?? this.list);
+      EusState(
+        isLoading: isLoading ?? this.isLoading,
+        error: error ?? this.error,
+        list: list ?? this.list,
+      );
 }
 
 class EusCubit extends Cubit<EusState> {
@@ -26,11 +31,24 @@ class EusCubit extends Cubit<EusState> {
 
     emit(state.copyWith(isLoading: true));
     if (!_tableCreated) {
-      await _db.createTableWithAttributes('endoscopy', ['patient_id', 'type', 'date', 'ec', 'endoscopist', 'follow_up', 'report', 'created_at']);
+      await _db.createTableWithAttributes('endoscopy', [
+        'patient_id',
+        'type',
+        'date',
+        'ec',
+        'endoscopist',
+        'follow_up',
+        'report',
+        'image_path',
+        'created_at',
+      ]);
       _tableCreated = true;
     }
     final rows = await _db.getAll('endoscopy');
-    final all = rows.map((r) => Endoscopy.fromMap(r)).where((e) => e.patientId == pid && e.type == 'EUS').toList();
+    final all = rows
+        .map((r) => Endoscopy.fromMap(r))
+        .where((e) => e.patientId == pid && e.type == 'EUS')
+        .toList();
     emit(state.copyWith(isLoading: false, list: all));
   }
 
@@ -46,8 +64,17 @@ class EusCubit extends Cubit<EusState> {
   }
 
   Future<void> delete(int id) async {
+    final item = state.list.firstWhere(
+      (e) => e.id == id,
+      orElse: () => Endoscopy(patientId: 0, type: '', date: ''),
+    );
+    final imagePath = item.imagePath;
     await _db.delete('endoscopy', id);
-    final newList = List<Endoscopy>.from(state.list)..removeWhere((e) => e.id == id);
+    final newList = List<Endoscopy>.from(state.list)
+      ..removeWhere((e) => e.id == id);
     emit(state.copyWith(list: newList));
+    if (imagePath != null && imagePath.isNotEmpty) {
+      await ImageService.deleteStoredImage(imagePath);
+    }
   }
 }

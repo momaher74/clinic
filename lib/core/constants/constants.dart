@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 var defaultGradient = LinearGradient(
@@ -51,3 +53,38 @@ TextStyle whiteStyle = const TextStyle(
   fontSize: 16,
   fontWeight: FontWeight.w500,
 );
+
+void sharedOpenImage(BuildContext context, String path) {
+  showDialog(
+    context: context,
+    builder: (_) => Dialog(
+      insetPadding: const EdgeInsets.all(12),
+      child: Stack(
+        alignment: Alignment.topRight,
+        children: [
+          Container(
+            color: Colors.white,
+            width: double.infinity,
+            height: double.infinity,
+            child: InteractiveViewer(
+              child: Image.file(
+                File(path),
+                fit: BoxFit.contain,
+                errorBuilder: (ctx, err, st) => const Padding(
+                  padding: EdgeInsets.all(24.0),
+                  child: Center(child: Text('Unable to load image')),
+                ),
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: Icon(Icons.close, color: Colors.red),
+          ),
+        ],
+      ),
+    ),
+  );
+}

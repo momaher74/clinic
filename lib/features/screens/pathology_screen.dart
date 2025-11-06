@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:clinic/core/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:clinic/core/services/image_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/manager/pathology_cubit.dart';
@@ -285,43 +285,10 @@ class _PathologyScreenState extends State<PathologyScreen> {
                             children: [
                               ElevatedButton.icon(
                                 onPressed: () async {
-                                  try {
-                                    final result = await FilePicker.platform
-                                        .pickFiles(
-                                          type: FileType.custom,
-                                          allowedExtensions: [
-                                            'png',
-                                            'jpg',
-                                            'jpeg',
-                                            'heic',
-                                            'bmp',
-                                          ],
-                                          allowMultiple: false,
-                                        );
-                                    if (result != null &&
-                                        result.files.isNotEmpty) {
-                                      final path = result.files.single.path;
-                                      if (path != null) {
-                                        setState(() => pickedPath = path);
-                                      } else {
-                                        final msg =
-                                            'Selected file has no path.';
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(content: Text(msg)),
-                                        );
-                                      }
-                                    }
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Could not open file picker: $e',
-                                        ),
-                                      ),
-                                    );
-                                  }
+                                  final stored =
+                                      await ImageService.pickAndStoreImage();
+                                  if (stored != null)
+                                    setState(() => pickedPath = stored);
                                 },
                                 icon: const Icon(
                                   Icons.folder_open,
