@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:clinic/core/constants/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:clinic/core/services/image_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -285,10 +286,55 @@ class _PathologyScreenState extends State<PathologyScreen> {
                             children: [
                               ElevatedButton.icon(
                                 onPressed: () async {
-                                  final stored =
-                                      await ImageService.pickAndStoreImage();
-                                  if (stored != null)
-                                    setState(() => pickedPath = stored);
+                                  try {
+                                    final stored =
+                                        await ImageService.pickAndStoreImage();
+                                    if (stored != null) {
+                                      setState(() => pickedPath = stored);
+                                    }
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                'Error picking image: $e',
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: Icon(
+                                                Icons.copy,
+                                                color: Colors.white,
+                                              ),
+                                              onPressed: () {
+                                                // Copy the error message to clipboard
+                                                Clipboard.setData(
+                                                  ClipboardData(
+                                                    text: e.toString(),
+                                                  ),
+                                                );
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      'Copied to clipboard!',
+                                                    ),
+                                                    duration: Duration(
+                                                      seconds: 1,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                        backgroundColor: Colors.red,
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
                                 },
                                 icon: const Icon(
                                   Icons.folder_open,

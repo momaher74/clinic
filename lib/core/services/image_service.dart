@@ -20,6 +20,7 @@ class ImageService {
       // Don't use BuildContext for UI here (avoids async context issues).
       // Let callers show UI feedback; log for debugging.
       debugPrint('Failed to pick image: $e');
+
       return null;
     }
   }
